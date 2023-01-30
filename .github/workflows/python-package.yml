@@ -32,8 +32,8 @@ jobs:
     - run: poetry --version
     - name: Install dependencies
       run: poetry install
-    - name: Install pytorch
-      run: poetry run pip install torch
+    - name: Install pytorch-cpu
+      run: poetry run pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
     - name: Test with pytest
       run: |
         poetry run pytest
