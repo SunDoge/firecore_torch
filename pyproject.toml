@@ -11,6 +11,9 @@ packages = [{ include = "firecore_torch" }]
 python = ">=3.8,<4.0"
 firecore = ">=0.5"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
