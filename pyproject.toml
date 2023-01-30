@@ -8,9 +8,8 @@ readme = "README.md"
 packages = [{ include = "firecore_torch" }]
 
 [tool.poetry.dependencies]
-python = ">=3.7"
+python = ">=3.8,<4.0"
 firecore = ">=0.5"
-torch = ">=1.0.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -32,6 +32,8 @@ jobs:
     - run: poetry --version
     - name: Install dependencies
       run: poetry install
+    - name: Install pytorch
+      run: poetry run pip install torch
     - name: Test with pytest
       run: |
         poetry run pytest
