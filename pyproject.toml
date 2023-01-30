@@ -10,7 +10,7 @@ packages = [{ include = "firecore_torch" }]
 [tool.poetry.dependencies]
 python = ">=3.7"
 firecore = ">=0.5"
-
+torch = ">=1.0.0"
 
 [build-system]
 requires = ["poetry-core"]
