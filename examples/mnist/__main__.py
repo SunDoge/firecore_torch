@@ -78,6 +78,8 @@ class TrainWorkflow(Workflow):
 
     def step(self, epoch: int):
         self.model.train()
+        self.data.sampler.set_epoch(epoch)
+        self.metric.reset()
 
         for batch_idx, batch in enumerate(self.data):
             batch = {k: v.to(self.device, non_blocking=True)
@@ -94,11 +96,11 @@ class TrainWorkflow(Workflow):
             if batch_idx % 10 == 0:
                 metrics = self.metric.compute()
                 logger.info('show metrics', batch_idx=batch_idx,
-                            metrics=metrics)
+                            **metrics)
 
         self.metric.sync()
         metrics = self.metric.compute()
-        logger.info('show metrics', epoch=epoch, metrics=metrics)
+        logger.info('show metrics', epoch=epoch, **metrics)
 
 
 class TestWorkflow(Workflow):
@@ -121,7 +123,7 @@ def get_backend(device_type: str):
 
 @firecore.main_fn
 def main():
-    firecore.logging.init()
+    firecore.logging.init(level='DEBUG')
 
     args = Args.from_args()
 
@@ -156,6 +158,6 @@ def main():
 
     train_workflow = TrainWorkflow(
         model, criterion, optimizer, lr_scheduler, pipelines[
-            0]['data'], pipelines[0]['metric'], device,
+            1]['data'], pipelines[1]['metric'], device,
     )
     train_workflow.step(0)

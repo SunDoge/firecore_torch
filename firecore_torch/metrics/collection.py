@@ -1,6 +1,9 @@
 from .base import BaseMetric
 from typing import List
 import torch
+from firecore.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class MetricCollection:
@@ -19,8 +22,10 @@ class MetricCollection:
         return out
 
     def sync(self) -> torch.futures.Future:
+        logger.debug('Sync all metrics', metrics=self._metrics)
         return torch.futures.collect_all([m.sync() for m in self._metrics])
 
     def reset(self):
+        logger.debug('Reset all metrics', metrics=self._metrics)
         for metric in self._metrics:
             metric.reset()
