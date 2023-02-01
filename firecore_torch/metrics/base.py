@@ -30,3 +30,6 @@ class BaseMetric:
 
     def sync(self) -> torch.Future:
         pass
+
+    def reset(self):
+        pass

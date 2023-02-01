@@ -18,5 +18,9 @@ class MetricCollection:
             out.update(metric.compute_adapted())
         return out
 
-    def sync(self):
-        torch.futures.wait_all([m.sync() for m in self._metrics])
+    def sync(self) -> torch.futures.Future:
+        return torch.futures.collect_all([m.sync() for m in self._metrics])
+
+    def reset(self):
+        for metric in self._metrics:
+            metric.reset()

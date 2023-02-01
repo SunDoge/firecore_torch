@@ -1,5 +1,6 @@
 from torchvision.datasets import MNIST as Base
 from torchvision import transforms
+from torch import nn
 
 
 class Mnist(Base):
@@ -18,3 +19,7 @@ def train_transform():
 
 def test_transform():
     return train_transform()
+
+
+def get_params(model: nn.Module):
+    return model.parameters()

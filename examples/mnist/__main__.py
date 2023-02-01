@@ -11,7 +11,7 @@ import torch.nn.functional as F
 import torch
 from icecream import ic
 from firecore_torch.helpers.distributed import init_process_group
-
+from torch import Tensor
 
 logger = get_logger(__name__)
 
@@ -48,12 +48,68 @@ class Net(BaseModel):
         return {'output': x}
 
 
-def train():
-    pass
+class Workflow:
+
+    def step(self, epoch: int):
+        pass
 
 
-def test():
-    pass
+class TrainWorkflow(Workflow):
+
+    def __init__(
+        self,
+        model,
+        criterion,
+        optimizer,
+        lr_scheduler,
+        data,
+        metric,
+        device,
+        **kwargs,
+    ) -> None:
+        super().__init__()
+        self.model = model
+        self.criterion = criterion
+        self.optimizer = optimizer
+        self.lr_scheduler = lr_scheduler
+        self.data = data
+        self.metric = metric
+        self.device = device
+
+    def step(self, epoch: int):
+        self.model.train()
+
+        for batch_idx, batch in enumerate(self.data):
+            batch = {k: v.to(self.device, non_blocking=True)
+                     for k, v in batch.items()}
+            self.optimizer.zero_grad()
+            outputs = self.model(**batch)
+            losses: Dict[str, Tensor] = self.criterion(**outputs, **batch)
+            losses['loss'].backward()
+            self.optimizer.step()
+
+            losses = {k: v.detach() for k, v in losses.items()}
+            self.metric.update(**losses, **outputs, **batch)
+
+            if batch_idx % 10 == 0:
+                metrics = self.metric.compute()
+                logger.info('show metrics', batch_idx=batch_idx,
+                            metrics=metrics)
+
+        self.metric.sync()
+        metrics = self.metric.compute()
+        logger.info('show metrics', epoch=epoch, metrics=metrics)
+
+
+class TestWorkflow(Workflow):
+
+    def __init__(
+        self
+    ) -> None:
+        super().__init__()
+
+    def step(self, epoch: int):
+        return super().step(epoch)
 
 
 def get_backend(device_type: str):
@@ -80,5 +136,26 @@ def main():
 
     ic(cfg)
 
-    data = firecore.resolve(cfg['data'])
-    ic(data['train'])
+    model: nn.Module = firecore.resolve(cfg['model'])
+    model.to(device)
+    ic(model)
+    criterion: nn.Module = firecore.resolve(cfg['criterion'])
+    criterion.to(device)
+    ic(criterion)
+    params = firecore.resolve(cfg['params'], model=model)
+    ic(params)
+    optimizer = firecore.resolve(cfg['optimizer'], params=params)
+    ic(optimizer)
+    lr_scheduler = firecore.resolve(cfg['lr_scheduler'], optimizer=optimizer)
+    ic(lr_scheduler)
+
+    workflow = cfg['workflow']
+    ic(workflow)
+    pipelines = [firecore.resolve(cfg[k]) for k in workflow.keys()]
+    ic(pipelines)
+
+    train_workflow = TrainWorkflow(
+        model, criterion, optimizer, lr_scheduler, pipelines[
+            0]['data'], pipelines[0]['metric'], device,
+    )
+    train_workflow.step(0)

@@ -5,18 +5,19 @@ from torch.utils.data import DistributedSampler, Sampler
 from typing import Optional
 from firecore.logging import get_logger
 import torch.multiprocessing as mp
+import firecore
 
 logger = get_logger(__name__)
 
 
 def make_data(
     transform,
-    make_dataset: Callable[[Callable], Dataset],
-    make_loader: Callable[[Dataset], DataLoader],
+    dataset,
+    loader,
 ):
-    dataset = make_dataset(transform=transform)
-    loader = make_loader(dataset)
-    return loader
+    dataset_instance = dataset(transform=transform)
+    loader_instance = loader(dataset=dataset_instance)
+    return loader_instance
 
 
 def make_loader(
