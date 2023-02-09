@@ -1,4 +1,4 @@
-from .base import BaseWorkflow
+from .base import BaseRunner
 from torch import nn, Tensor
 from typing import Dict, Iterable, List
 import torch
@@ -10,7 +10,7 @@ from icecream import ic
 TensorDict = Dict[str, Tensor]
 
 
-class Basic(BaseWorkflow):
+class BasicRunner(BaseRunner):
 
     def __init__(
         self,
@@ -21,11 +21,10 @@ class Basic(BaseWorkflow):
         metrics: MetricCollection,
         # Auto fill
         device: torch.device,
-        prefix: str,
         hooks: list,
         **kwargs
     ) -> None:
-        super().__init__(prefix, hooks, **kwargs)
+        super().__init__(hooks, **kwargs)
         self.base_model = base_model
         self.model = model
         self.criterion = criterion
@@ -33,13 +32,14 @@ class Basic(BaseWorkflow):
         self.device = device
         self.metrics = metrics
 
-    def step(self, epoch: int):
-        self.call_hook('before_epoch', epoch=epoch)
+    def step(self, epoch: int, stage: str = ''):
+        self.call_hook('before_epoch', epoch=epoch, stage=stage)
         for batch_idx, batch in enumerate(self.data):
             self.call_hook(
                 'before_iter',
                 epoch=epoch,
                 batch_idx=batch_idx,
+                stage=stage,
                 **batch
             )
             # TODO: maybe a filter
@@ -53,6 +53,7 @@ class Basic(BaseWorkflow):
                 'after_iter',
                 epoch=epoch,
                 batch_idx=batch_idx,
+                stage=stage,
                 **batch_on_device,
                 **outputs,
                 **losses
@@ -69,7 +70,7 @@ class Basic(BaseWorkflow):
         if dist.is_available() and dist.is_initialized():
             self.metrics.sync().wait()
         metrics = self.metrics.compute()
-        self.call_hook('after_epoch', epoch=epoch, **metrics)
+        self.call_hook('after_epoch', epoch=epoch, stage=stage, **metrics)
 
     def run_iter(self, batch: Dict[str, Tensor], epoch: int, batch_idx: int):
         pass

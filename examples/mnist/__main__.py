@@ -11,7 +11,7 @@ import torch
 from icecream import ic
 from firecore_torch.helpers.distributed import init_process_group
 from torch import Tensor
-from firecore_torch.workflow import Trainer
+from firecore_torch.runners import Trainer
 from firecore_torch import helpers
 import logging
 

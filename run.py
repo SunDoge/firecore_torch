@@ -1,5 +1,5 @@
 from firecore_torch.hooks import TrainingHook, InferenceHook, TextLoggerHook
-from firecore_torch.workflow.basic import Basic
+from firecore_torch.runners.basic import BasicRunner
 import torch
 from firecore_torch.modules.base import BaseModel
 from firecore_torch.metrics import MetricCollection, Average
@@ -30,7 +30,7 @@ def main():
         x=torch.rand(10, 4),
         y=torch.rand(10, 4),
     )]
-    basic_workflow = Basic(
+    basic_workflow = BasicRunner(
         base_model=base_model,
         model=model,
         criterion=Loss(

@@ -5,14 +5,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class BaseWorkflow:
+class BaseRunner:
 
-    def __init__(self, prefix: str, hooks: List[BaseHook], **kwargs) -> None:
+    def __init__(self, hooks: List[BaseHook], **kwargs) -> None:
         self._kwargs = kwargs
         self._hooks = hooks
-        self.prefix = prefix
 
-    def step(self, epoch: int):
+    def step(self, epoch: int, stage: str = ''):
         pass
 
     def call_hook(self, method: str, **kwargs):
