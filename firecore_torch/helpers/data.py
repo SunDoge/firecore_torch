@@ -6,6 +6,8 @@ from typing import Optional
 from firecore.logging import get_logger
 import torch.multiprocessing as mp
 import firecore
+from torch import Tensor
+import torch
 
 logger = get_logger(__name__)
 
@@ -97,3 +99,6 @@ class DistributedExactSampler(Sampler):
 
     def __len__(self):
         return self.num_samples
+
+
+

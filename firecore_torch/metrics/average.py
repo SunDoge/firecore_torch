@@ -14,6 +14,7 @@ class Average(BaseMetric):
         self._val = torch.tensor(0., dtype=torch.float)
 
     def update(self, output: Tensor, target: Tensor, **kwargs):
+        # print(output)
         batch_size = target.size(0)
         device = output.device
 

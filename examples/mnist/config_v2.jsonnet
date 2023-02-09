@@ -1,6 +1,6 @@
 {
   base: {
-    batch_size: 32,
+    batch_size: 128,
     num_workers: 2,
     max_epochs: 14,
   },
@@ -32,6 +32,7 @@
   },
 
   train: {
+    _partial: 'firecore_torch.workflow.Trainer',
     data: {
       _call: 'firecore_torch.helpers.data.make_data',
       transform: {
@@ -52,9 +53,11 @@
         shuffle: true,
       },
     },
-    metric: $.test.metric,
+    metrics: $.test.metrics,
+    log_interval: 10,
   },
   test: {
+    _partial: 'firecore_torch.workflow.Evaluator',
     data: {
       _call: 'firecore_torch.helpers.data.make_data',
       transform: {
@@ -69,18 +72,18 @@
       loader: {
         _partial: 'firecore_torch.helpers.data.make_loader',
         dataset: null,
-        num_workers: $.base.num_workers,
-        batch_size: $.base.batch_size,
+        num_workers: $.base.num_workers * 2,
+        batch_size: $.base.batch_size * 2,
         shuffle: false,
       },
     },
-    metric: {
+    metrics: {
       _call: 'firecore_torch.metrics.MetricCollection',
       metrics: [
         {
           _call: 'firecore_torch.metrics.Average',
           in_rules: { output: 'loss', target: 'target' },
-          out_rules: { loss_avg: 'avg' },
+          out_rules: { loss: 'avg' },
         },
         {
           _call: 'firecore_torch.metrics.Accuracy',
@@ -88,9 +91,10 @@
         },
       ],
     },
+    log_interval: 10,
   },
-  workflow: {
-    train: 1,
-    test: 1,
-  },
+  plans: [
+    { key: 'train', interval: 1 },
+    { key: 'test', interval: 1 },
+  ],
 }

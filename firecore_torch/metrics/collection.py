@@ -1,9 +1,10 @@
 from .base import BaseMetric
 from typing import List
 import torch
-from firecore.logging import get_logger
+# from firecore.logging import get_logger
+import logging
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class MetricCollection:

@@ -1,19 +1,21 @@
 from firecore_torch.metrics import Accuracy, Average
 import firecore
-from firecore.logging import get_logger
 import typed_args as ta
 from dataclasses import dataclass
 from pathlib import Path
 from firecore_torch.modules.base import BaseModel
-from typing import Dict
+from typing import Dict, List
 from torch import nn
 import torch.nn.functional as F
 import torch
 from icecream import ic
 from firecore_torch.helpers.distributed import init_process_group
 from torch import Tensor
+from firecore_torch.workflow import Trainer
+from firecore_torch import helpers
+import logging
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -48,72 +50,6 @@ class Net(BaseModel):
         return {'output': x}
 
 
-class Workflow:
-
-    def step(self, epoch: int):
-        pass
-
-
-class TrainWorkflow(Workflow):
-
-    def __init__(
-        self,
-        model,
-        criterion,
-        optimizer,
-        lr_scheduler,
-        data,
-        metric,
-        device,
-        **kwargs,
-    ) -> None:
-        super().__init__()
-        self.model = model
-        self.criterion = criterion
-        self.optimizer = optimizer
-        self.lr_scheduler = lr_scheduler
-        self.data = data
-        self.metric = metric
-        self.device = device
-
-    def step(self, epoch: int):
-        self.model.train()
-        self.data.sampler.set_epoch(epoch)
-        self.metric.reset()
-
-        for batch_idx, batch in enumerate(self.data):
-            batch = {k: v.to(self.device, non_blocking=True)
-                     for k, v in batch.items()}
-            self.optimizer.zero_grad()
-            outputs = self.model(**batch)
-            losses: Dict[str, Tensor] = self.criterion(**outputs, **batch)
-            losses['loss'].backward()
-            self.optimizer.step()
-
-            losses = {k: v.detach() for k, v in losses.items()}
-            self.metric.update(**losses, **outputs, **batch)
-
-            if batch_idx % 10 == 0:
-                metrics = self.metric.compute()
-                logger.info('show metrics', batch_idx=batch_idx,
-                            **metrics)
-
-        self.metric.sync()
-        metrics = self.metric.compute()
-        logger.info('show metrics', epoch=epoch, **metrics)
-
-
-class TestWorkflow(Workflow):
-
-    def __init__(
-        self
-    ) -> None:
-        super().__init__()
-
-    def step(self, epoch: int):
-        return super().step(epoch)
-
-
 def get_backend(device_type: str):
     return {
         'cuda': 'nccl',
@@ -123,7 +59,8 @@ def get_backend(device_type: str):
 
 @firecore.main_fn
 def main():
-    firecore.logging.init(level='DEBUG')
+    # firecore.logging.init(level='INFO')
+    firecore.logging_v2.init()
 
     args = Args.from_args()
 
@@ -139,7 +76,7 @@ def main():
     ic(cfg)
 
     model: nn.Module = firecore.resolve(cfg['model'])
-    model.to(device)
+    model = helpers.make_dist_model(model, device)
     ic(model)
     criterion: nn.Module = firecore.resolve(cfg['criterion'])
     criterion.to(device)
@@ -151,13 +88,25 @@ def main():
     lr_scheduler = firecore.resolve(cfg['lr_scheduler'], optimizer=optimizer)
     ic(lr_scheduler)
 
-    workflow = cfg['workflow']
-    ic(workflow)
-    pipelines = [firecore.resolve(cfg[k]) for k in workflow.keys()]
-    ic(pipelines)
+    plans: List[Dict] = cfg['plans']
 
-    train_workflow = TrainWorkflow(
-        model, criterion, optimizer, lr_scheduler, pipelines[
-            1]['data'], pipelines[1]['metric'], device,
+    shared = dict(
+        model=model,
+        criterion=criterion,
+        optimizer=optimizer,
+        lr_scheduler=lr_scheduler,
+        device=device,
     )
-    train_workflow.step(0)
+
+    workflows: Dict[str, Trainer] = {}
+    for plan in plans:
+        key = plan['key']
+        workflows[key] = firecore.resolve(
+            cfg[key]
+        )(**shared)
+
+    for epoch in range(2):
+        for plan in plans:
+            if epoch % plan['interval'] == 0:
+                workflow = workflows[plan['key']]
+                workflow.step(epoch)
