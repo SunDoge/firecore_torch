@@ -30,3 +30,5 @@ class MetricCollection:
         logger.debug('Reset all metrics', metrics=self._metrics)
         for metric in self._metrics:
             metric.reset()
+
+    

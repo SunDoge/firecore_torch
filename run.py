@@ -30,7 +30,7 @@ def main():
         x=torch.rand(10, 4),
         y=torch.rand(10, 4),
     )]
-    basic_workflow = BasicRunner(
+    basic_runner = BasicRunner(
         base_model=base_model,
         model=model,
         criterion=Loss(
@@ -49,7 +49,7 @@ def main():
         hooks=[TextLoggerHook([dict(key='loss', fmt=':.4f')])],
         optimizer=optimizer
     )
-    basic_workflow.step(1)
+    basic_runner.step(1, stage='basic')
 
     # basic_workflow._hooks = [InferenceHook()]
     # basic_workflow.step(1)
