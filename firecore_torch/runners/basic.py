@@ -10,7 +10,7 @@ from icecream import ic
 TensorDict = Dict[str, Tensor]
 
 
-class BasicRunner(BaseRunner):
+class EpochBasedRunner(BaseRunner):
 
     def __init__(
         self,
@@ -25,12 +25,14 @@ class BasicRunner(BaseRunner):
         **kwargs
     ) -> None:
         super().__init__(hooks, **kwargs)
+
         self.base_model = base_model
         self.model = model
         self.criterion = criterion
         self.data = data
         self.device = device
         self.metrics = metrics
+        self.max_iters = len(data)
 
     def step(self, epoch: int, stage: str = ''):
         self.call_hook('before_epoch', epoch=epoch, stage=stage)
@@ -64,13 +66,15 @@ class BasicRunner(BaseRunner):
             )
             self.call_hook(
                 'after_metrics',
+                epoch=epoch,
+                batch_idx=batch_idx,
+                stage=stage,
                 **losses, **outputs, **batch_on_device
             )
 
         if dist.is_available() and dist.is_initialized():
             self.metrics.sync().wait()
-        metrics = self.metrics.compute()
-        self.call_hook('after_epoch', epoch=epoch, stage=stage, **metrics)
+        self.call_hook('after_epoch', epoch=epoch, stage=stage)
 
     def run_iter(self, batch: Dict[str, Tensor], epoch: int, batch_idx: int):
         pass

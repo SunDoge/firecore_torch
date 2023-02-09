@@ -1,5 +1,5 @@
 from firecore_torch.hooks import TrainingHook, InferenceHook, TextLoggerHook
-from firecore_torch.runners.basic import BasicRunner
+from firecore_torch.runners.basic import EpochBasedRunner
 import torch
 from firecore_torch.modules.base import BaseModel
 from firecore_torch.metrics import MetricCollection, Average
@@ -30,7 +30,7 @@ def main():
         x=torch.rand(10, 4),
         y=torch.rand(10, 4),
     )]
-    basic_runner = BasicRunner(
+    basic_runner = EpochBasedRunner(
         base_model=base_model,
         model=model,
         criterion=Loss(
@@ -38,15 +38,20 @@ def main():
             in_rules={'output': 'output', 'target': 'y'}
         ),
         data=data,
-        metrics=MetricCollection([
-            Average(
+        metrics=MetricCollection(dict(
+            loss=Average(
                 in_rules={'output': 'loss', 'target': 'y'},
                 out_rules={'loss': 'avg'}
+            ),
+            loss2=Average(
+                in_rules={'output': 'loss', 'target': 'y'},
+                out_rules={'loss2': 'avg'}
             )
-        ]),
+        )),
         device=device,
         prefix='basic',
-        hooks=[TextLoggerHook([dict(key='loss', fmt=':.4f')])],
+        hooks=[TextLoggerHook(
+            [dict(key='loss', fmt=':.4f'), dict(key='loss2', fmt=':.4f')])],
         optimizer=optimizer
     )
     basic_runner.step(1, stage='basic')
