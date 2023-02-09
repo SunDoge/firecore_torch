@@ -61,6 +61,10 @@ class Basic(BaseWorkflow):
             self.metrics.update(
                 **losses, **outputs, **batch_on_device
             )
+            self.call_hook(
+                'after_metrics',
+                **losses, **outputs, **batch_on_device
+            )
 
         if dist.is_available() and dist.is_initialized():
             self.metrics.sync().wait()

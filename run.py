@@ -1,4 +1,4 @@
-from firecore_torch.hooks import TrainingHook, InferenceHook
+from firecore_torch.hooks import TrainingHook, InferenceHook, TextLoggerHook
 from firecore_torch.workflow.basic import Basic
 import torch
 from firecore_torch.modules.base import BaseModel
@@ -39,20 +39,23 @@ def main():
         ),
         data=data,
         metrics=MetricCollection([
-            Average(in_rules={'output': 'loss', 'target': 'y'})
+            Average(
+                in_rules={'output': 'loss', 'target': 'y'},
+                out_rules={'loss': 'avg'}
+            )
         ]),
         device=device,
         prefix='basic',
-        hooks=[],
+        hooks=[TextLoggerHook([dict(key='loss', fmt=':.4f')])],
         optimizer=optimizer
     )
     basic_workflow.step(1)
 
-    basic_workflow._hooks = [InferenceHook()]
-    basic_workflow.step(1)
+    # basic_workflow._hooks = [InferenceHook()]
+    # basic_workflow.step(1)
 
-    basic_workflow._hooks = [TrainingHook()]
-    basic_workflow.step(1)
+    # basic_workflow._hooks = [TrainingHook()]
+    # basic_workflow.step(1)
 
 
 if __name__ == '__main__':

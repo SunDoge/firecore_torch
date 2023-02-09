@@ -13,3 +13,6 @@ class BaseHook:
 
     def after_epoch(self, **kwargs):
         pass
+
+    def after_metrics(self, **kwargs):
+        pass
