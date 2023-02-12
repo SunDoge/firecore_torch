@@ -20,10 +20,7 @@ class TrainingHook(BaseHook):
         logger.info('model.train()')
         model.train()
 
-    def before_iter(self, **kwargs):
-        return super().before_iter(**kwargs)
-
-    def after_iter(self, loss: Tensor, optimizer: Optimizer, **kwargs):
+    def after_forward(self, loss: Tensor, optimizer: Optimizer, **kwargs):
         loss.backward()
         optimizer.step()
         optimizer.zero_grad(set_to_none=True)

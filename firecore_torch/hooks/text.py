@@ -28,21 +28,12 @@ class TextLoggerHook(BaseHook):
         self._fmt = fmt
         self._metric_keys = metric_keys
 
-    def before_epoch(self, **kwargs):
-        return super().before_epoch(**kwargs)
-
-    def before_iter(self, **kwargs):
-        return super().before_iter(**kwargs)
-
-    def after_iter(self, metrics: MetricCollection, **kwargs):
-        pass
-
     def after_epoch(self, metrics: MetricCollection, epoch: int, **kwargs):
         metric_outputs = metrics.compute()
         formatted_outputs = self._format_metrics(metric_outputs)
         logger.info('{}'.format(' '.join(formatted_outputs)))
 
-    def after_metrics(self, metrics: MetricCollection, batch_idx: int, **kwargs):
+    def after_iter(self, metrics: MetricCollection, batch_idx: int, **kwargs):
         metric_outputs = metrics.compute_by_keys(self._metric_keys)
         formatted_outputs = self._format_metrics(metric_outputs)
         logger.info('{}'.format(' '.join(formatted_outputs)))

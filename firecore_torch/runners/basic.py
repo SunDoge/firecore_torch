@@ -49,8 +49,31 @@ class EpochBasedRunner(BaseRunner):
                 k: v.to(self.device, non_blocking=True)
                 for k, v in batch.items()
             }
+
+            self.call_hook(
+                'before_forward',
+                epoch=epoch,
+                batch_idx=batch_idx,
+                stage=stage,
+                **batch_on_device
+            )
             outputs: TensorDict = self.model(**batch_on_device)
             losses: TensorDict = self.criterion(**outputs, **batch_on_device)
+            self.call_hook(
+                'after_forward',
+                epoch=epoch,
+                batch_idx=batch_idx,
+                stage=stage,
+                **batch_on_device,
+                **outputs,
+                **losses
+            )
+
+            # import ipdb; ipdb.set_trace()
+            self.metrics.update(
+                **losses, **outputs, **batch_on_device
+            )
+
             self.call_hook(
                 'after_iter',
                 epoch=epoch,
@@ -59,17 +82,6 @@ class EpochBasedRunner(BaseRunner):
                 **batch_on_device,
                 **outputs,
                 **losses
-            )
-            # import ipdb; ipdb.set_trace()
-            self.metrics.update(
-                **losses, **outputs, **batch_on_device
-            )
-            self.call_hook(
-                'after_metrics',
-                epoch=epoch,
-                batch_idx=batch_idx,
-                stage=stage,
-                **losses, **outputs, **batch_on_device
             )
 
         if dist.is_available() and dist.is_initialized():

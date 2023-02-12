@@ -24,11 +24,5 @@ class InferenceHook(BaseHook):
         model.eval()
         self._inference_mode_raii_guard = torch._C._InferenceMode(True)
 
-    def before_iter(self, **kwargs):
-        return super().before_iter(**kwargs)
-
-    def after_iter(self, **kwargs):
-        return super().after_iter(**kwargs)
-
     def after_epoch(self, **kwargs):
         del self._inference_mode_raii_guard

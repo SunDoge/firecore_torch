@@ -1,9 +1,9 @@
 from torch.nn.parallel import DistributedDataParallel
 from torch import nn
 import torch
-from firecore.logging import get_logger
+import logging
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def make_dist_model(base_model: nn.Module, device: torch.device) -> DistributedDataParallel:
