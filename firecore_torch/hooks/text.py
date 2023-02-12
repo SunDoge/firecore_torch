@@ -28,8 +28,7 @@ class TextLoggerHook(BaseHook):
         self._fmt = fmt
         self._metric_keys = metric_keys
 
-    def after_epoch(self, metrics: MetricCollection, epoch: int, **kwargs):
-        metric_outputs = metrics.compute()
+    def after_epoch(self, metrics: MetricCollection, epoch: int, metric_outputs: Dict[str, Tensor],  **kwargs):
         formatted_outputs = self._format_metrics(metric_outputs)
         logger.info('{}'.format(' '.join(formatted_outputs)))
 

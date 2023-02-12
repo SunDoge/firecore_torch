@@ -86,7 +86,14 @@ class EpochBasedRunner(BaseRunner):
 
         if dist.is_available() and dist.is_initialized():
             self.metrics.sync().wait()
-        self.call_hook('after_epoch', epoch=epoch, stage=stage)
+
+        metric_outputs = self.metrics.compute()
+        self.call_hook(
+            'after_epoch',
+            epoch=epoch,
+            stage=stage,
+            metric_outputs=metric_outputs
+        )
 
     def run_iter(self, batch: Dict[str, Tensor], epoch: int, batch_idx: int):
         pass
