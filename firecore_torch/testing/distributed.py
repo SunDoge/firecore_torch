@@ -1,9 +1,9 @@
 import torch.distributed as dist
 from contextlib import contextmanager
 from firecore.system import find_free_port
-from firecore.logging import get_logger
+import logging
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @contextmanager

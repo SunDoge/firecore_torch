@@ -60,7 +60,7 @@ def get_backend(device_type: str):
 @firecore.main_fn
 def main():
     # firecore.logging.init(level='INFO')
-    firecore.logging_v2.init()
+    firecore.logging.init()
 
     args = Args.from_args()
 

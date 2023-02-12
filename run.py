@@ -21,7 +21,7 @@ class SimpleModel(BaseModel):
 
 
 def main():
-    firecore.logging_v2.init(level=logging.DEBUG)
+    firecore.logging.init(level=logging.DEBUG)
     base_model = SimpleModel()
     model = base_model
     optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
