@@ -14,6 +14,7 @@ class FmtCfg(TypedDict):
 
 class TextLoggerHook(BaseHook):
 
+    # TODO: change metric_keys to other name
     def __init__(self,  fmt: List[FmtCfg], interval: int = 100, metric_keys: Optional[List[str]] = None) -> None:
         """
         Args:

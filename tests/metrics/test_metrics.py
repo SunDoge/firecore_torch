@@ -33,10 +33,10 @@ def test_accuracy():
 
         acc.update(x, y)
         res = acc.compute()
-        assert res['top1'] == 0.1
-        assert res['top5'] == 1.0
+        assert res['acc1'] == 0.1
+        assert res['acc5'] == 1.0
 
         acc.sync()
         res = acc.compute()
-        assert res['top1'] == 0.1
-        assert res['top5'] == 1.0
+        assert res['acc1'] == 0.1
+        assert res['acc5'] == 1.0
