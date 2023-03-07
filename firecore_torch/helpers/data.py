@@ -3,13 +3,13 @@ from typing import Type, Callable, Dict, Any
 import torch.distributed as dist
 from torch.utils.data import DistributedSampler, Sampler
 from typing import Optional
-from firecore.logging import get_logger
+import logging
 import torch.multiprocessing as mp
 import firecore
 from torch import Tensor
 import torch
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def make_data(
@@ -36,7 +36,7 @@ def make_loader(
             sampler = DistributedExactSampler(dataset)
     else:
         sampler = None
-    logger.info('Make sampler', sampler_type=sampler.__class__)
+    logger.info('Make sampler: %s', sampler.__class__)
     multiprocessing_context = mp.get_context(
         'fork') if num_workers > 0 else None
     default_kwargs = dict(
@@ -99,6 +99,3 @@ class DistributedExactSampler(Sampler):
 
     def __len__(self):
         return self.num_samples
-
-
-

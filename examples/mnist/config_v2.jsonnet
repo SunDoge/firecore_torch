@@ -1,12 +1,12 @@
 {
   base: {
-    batch_size: 128,
-    num_workers: 2,
+    batch_size: 32,
+    num_workers: 0,
     max_epochs: 14,
   },
   model: {
     _call: 'examples.mnist.__main__.Net',
-    in_rules: { x: 'data' },
+    in_rules: { x: 'image' },
   },
   criterion: {
     _call: 'firecore_torch.modules.loss.Loss',
@@ -32,7 +32,7 @@
   },
 
   train: {
-    _partial: 'firecore_torch.workflow.Trainer',
+    _partial: 'firecore_torch.runners.EpochBasedRunner',
     data: {
       _call: 'firecore_torch.helpers.data.make_data',
       transform: {
@@ -54,10 +54,21 @@
       },
     },
     metrics: $.test.metrics,
-    log_interval: 10,
+    hooks: [
+      {
+        _call: 'firecore_torch.hooks.TrainingHook',
+      },
+      {
+        _call: 'firecore_torch.hooks.TextLoggerHook',
+        fmt: [
+          { key: 'loss', fmt: ':.4f' },
+        ],
+        metric_keys: ['loss'],
+      },
+    ],
   },
   test: {
-    _partial: 'firecore_torch.workflow.Evaluator',
+    _partial: 'firecore_torch.runners.EpochBasedRunner',
     data: {
       _call: 'firecore_torch.helpers.data.make_data',
       transform: {
@@ -79,22 +90,35 @@
     },
     metrics: {
       _call: 'firecore_torch.metrics.MetricCollection',
-      metrics: [
-        {
+      metrics: {
+        loss: {
           _call: 'firecore_torch.metrics.Average',
           in_rules: { output: 'loss', target: 'target' },
           out_rules: { loss: 'avg' },
         },
-        {
+        acc: {
           _call: 'firecore_torch.metrics.Accuracy',
           topk: [1, 5],
         },
-      ],
+      },
     },
-    log_interval: 10,
+    hooks: [
+      {
+        _call: 'firecore_torch.hooks.InferenceHook',
+      },
+      {
+        _call: 'firecore_torch.hooks.TextLoggerHook',
+        fmt: [
+          { key: 'loss', fmt: ':.4f' },
+          { key: 'acc1', fmt: ':.4f' },
+          { key: 'acc5', fmt: ':.4f' },
+        ],
+        metric_keys: ['loss', 'acc'],
+      },
+    ],
   },
   plans: [
-    { key: 'train', interval: 1 },
-    { key: 'test', interval: 1 },
+    // { key: 'train', interval: 10 },
+    { key: 'test', interval: 10 },
   ],
 }

@@ -24,3 +24,5 @@ class DistInfo:
 def init_process_group(backend: str):
     dist_info = DistInfo()
     dist.init_process_group(backend)
+
+

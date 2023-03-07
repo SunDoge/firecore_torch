@@ -1,6 +1,6 @@
 from .base import BaseRunner
 from torch import nn, Tensor
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Callable
 import torch
 from firecore_torch import helpers
 from firecore_torch.metrics import MetricCollection
@@ -8,6 +8,16 @@ import torch.distributed as dist
 from icecream import ic
 
 TensorDict = Dict[str, Tensor]
+
+
+def default_forward_fn(
+    model: nn.Module,
+    criterion: nn.Module,
+    **kwargs
+):
+    outputs = model(**kwargs)
+    losses = criterion(**outputs, **kwargs)
+    return outputs, losses
 
 
 class EpochBasedRunner(BaseRunner):
@@ -19,9 +29,12 @@ class EpochBasedRunner(BaseRunner):
         criterion: nn.Module,
         data: Iterable[Dict[str, Tensor]],
         metrics: MetricCollection,
+        max_epochs: int,
+
         # Auto fill
         device: torch.device,
         hooks: list,
+        forward_fn: Callable = default_forward_fn,
         **kwargs
     ) -> None:
         super().__init__(hooks, **kwargs)
@@ -33,6 +46,8 @@ class EpochBasedRunner(BaseRunner):
         self.device = device
         self.metrics = metrics
         self.max_iters = len(data)
+        self.max_epochs = max_epochs
+        self.forward_fn = forward_fn
 
     def step(self, epoch: int, stage: str = ''):
         self.call_hook('before_epoch', epoch=epoch, stage=stage)
@@ -57,8 +72,14 @@ class EpochBasedRunner(BaseRunner):
                 stage=stage,
                 **batch_on_device
             )
-            outputs: TensorDict = self.model(**batch_on_device)
-            losses: TensorDict = self.criterion(**outputs, **batch_on_device)
+            # outputs: TensorDict = self.model(**batch_on_device)
+            # losses: TensorDict = self.criterion(**outputs, **batch_on_device)
+
+            outputs, losses = self.forward_fn(
+                **self.__dict__,
+                **batch_on_device
+            )
+
             self.call_hook(
                 'after_forward',
                 epoch=epoch,

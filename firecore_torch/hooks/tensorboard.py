@@ -5,6 +5,7 @@ import torch.distributed as dist
 import logging
 from torch import Tensor
 from typing import Dict
+from firecore_torch.helpers import rank_zero
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,9 @@ class TensorboardHook(BaseHook):
     ) -> None:
         super().__init__()
 
+    @rank_zero
     def after_epoch(self, summary_writer: SummaryWriter, metric_outputs: Dict[str, Tensor], stage: str, epoch: int, **kwargs):
+
         for key, value in metric_outputs.items():
             if value.ndim == 0:
                 logger.info(

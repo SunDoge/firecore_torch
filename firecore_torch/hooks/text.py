@@ -28,14 +28,17 @@ class TextLoggerHook(BaseHook):
         self._fmt = fmt
         self._metric_keys = metric_keys
 
-    def after_epoch(self, metrics: MetricCollection, epoch: int, metric_outputs: Dict[str, Tensor],  **kwargs):
+    def after_epoch(self, metrics: MetricCollection, epoch: int, metric_outputs: Dict[str, Tensor], max_epochs: int, **kwargs):
         formatted_outputs = self._format_metrics(metric_outputs)
         logger.info('{}'.format(' '.join(formatted_outputs)))
 
     def after_iter(self, metrics: MetricCollection, batch_idx: int, **kwargs):
+        if batch_idx > 0 and batch_idx % self._interval != 0:
+            return
         metric_outputs = metrics.compute_by_keys(self._metric_keys)
         formatted_outputs = self._format_metrics(metric_outputs)
-        logger.info('{}'.format(' '.join(formatted_outputs)))
+        prefix = f'{batch_idx}'
+        logger.info('{} {}'.format(prefix, ' '.join(formatted_outputs)))
 
     def _format_metrics(self, outputs: Dict[str, Tensor]) -> List[str]:
         res = []

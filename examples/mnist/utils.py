@@ -6,8 +6,8 @@ from torch import nn
 class Mnist(Base):
 
     def __getitem__(self, index: int):
-        data, target = super().__getitem__(index)
-        return dict(data=data, target=target)
+        image, target = super().__getitem__(index)
+        return dict(image=image, target=target)
 
 
 def train_transform():

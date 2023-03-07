@@ -75,13 +75,13 @@ def main():
 
     ic(cfg)
 
-    model: nn.Module = firecore.resolve(cfg['model'])
-    model = helpers.make_dist_model(model, device)
-    ic(model)
+    base_model: nn.Module = firecore.resolve(cfg['model'])
+    model = helpers.make_dist_model(base_model, device)
+    ic(base_model)
     criterion: nn.Module = firecore.resolve(cfg['criterion'])
     criterion.to(device)
     ic(criterion)
-    params = firecore.resolve(cfg['params'], model=model)
+    params = firecore.resolve(cfg['params'], model=base_model)
     ic(params)
     optimizer = firecore.resolve(cfg['optimizer'], params=params)
     ic(optimizer)
@@ -91,11 +91,13 @@ def main():
     plans: List[Dict] = cfg['plans']
 
     shared = dict(
+        base_model=base_model,
         model=model,
         criterion=criterion,
         optimizer=optimizer,
         lr_scheduler=lr_scheduler,
         device=device,
+        max_epochs=cfg['base']['max_epochs']
     )
 
     workflows: Dict[str, Trainer] = {}

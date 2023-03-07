@@ -1,5 +1,5 @@
 from firecore_torch.hooks import TrainingHook, InferenceHook, TextLoggerHook
-from firecore_torch.runners.basic import EpochBasedRunner
+from firecore_torch.runners.epoch_based import EpochBasedRunner
 import torch
 from firecore_torch.modules.base import BaseModel
 from firecore_torch.metrics import MetricCollection, Average

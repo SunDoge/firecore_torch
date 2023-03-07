@@ -35,7 +35,7 @@ class Accuracy(BaseMetric):
         acc = self._sum / self._count
 
         for i, k in enumerate(self._topk):
-            result['top{}'.format(k)] = acc[i]
+            result['acc{}'.format(k)] = acc[i]
         return result
 
     def sync(self) -> torch.Future:
