@@ -47,7 +47,7 @@ class EpochBasedRunner(BaseRunner):
         self.metrics = metrics
         self.epoch_length = len(data)
         self.max_epochs = max_epochs
-        self.forward_fn = forward_fn
+        self._forward_fn = forward_fn
 
     def step(self, epoch: int, stage: str = ''):
         self.call_hook('before_epoch', epoch=epoch, stage=stage)
@@ -72,11 +72,9 @@ class EpochBasedRunner(BaseRunner):
                 stage=stage,
                 **batch_on_device
             )
-            # outputs: TensorDict = self.model(**batch_on_device)
-            # losses: TensorDict = self.criterion(**outputs, **batch_on_device)
 
-            outputs, losses = self.forward_fn(
-                **self.__dict__,
+            outputs, losses = self._forward_fn(
+                **self._public_dict,
                 **batch_on_device
             )
 
@@ -105,6 +103,9 @@ class EpochBasedRunner(BaseRunner):
                 **losses
             )
 
+            if batch_idx == 1000:
+                break
+
         if dist.is_available() and dist.is_initialized():
             self.metrics.sync().wait()
 
@@ -116,3 +117,8 @@ class EpochBasedRunner(BaseRunner):
             stage=stage,
             metric_outputs=metric_outputs
         )
+        # gc.collect()
+
+    def run_iter(self, batch: Dict[str, Tensor], epoch: int, batch_idx: int):
+        pass
+        # return outputs, losses

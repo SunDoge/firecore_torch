@@ -59,6 +59,10 @@ def get_backend(device_type: str):
 
 @firecore.main_fn
 def main():
+    # import tracemalloc
+
+    # tracemalloc.start()
+
     # firecore.logging.init(level='INFO')
     firecore.logging.init()
 
@@ -112,3 +116,10 @@ def main():
             if epoch % plan['interval'] == 0:
                 workflow = workflows[plan['key']]
                 workflow.step(epoch)
+
+    # snapshot = tracemalloc.take_snapshot()
+    # top_stats = snapshot.statistics('lineno')
+
+    # print("[ Top 10 ]")
+    # for stat in top_stats[:10]:
+    #     print(stat)
