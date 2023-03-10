@@ -1,6 +1,6 @@
 {
   base: {
-    batch_size: 32,
+    batch_size: 64,
     num_workers: 0,
     max_epochs: 14,
   },
@@ -78,6 +78,7 @@
         _partial: 'examples.mnist.utils.Mnist',
         root: 'data',
         train: false,
+        download: true,
         transform: null,
       },
       loader: {
@@ -118,7 +119,7 @@
     ],
   },
   plans: [
-    // { key: 'train', interval: 10 },
-    { key: 'test', interval: 10 },
+    { key: 'train', interval: 1 },
+    { key: 'test', interval: 1 },
   ],
 }
