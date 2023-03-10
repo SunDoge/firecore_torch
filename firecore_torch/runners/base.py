@@ -17,11 +17,10 @@ class BaseRunner:
     def call_hook(self, method: str, **kwargs):
         logger.debug('call hook: %s', method)
         for hook in self._hooks:
-            getattr(hook, method)(**self._public_dict, **kwargs, **self._kwargs)
+            self.call_method(getattr(hook, method), **kwargs)
+
+    def call_method(self, func, **kwargs):
+        return func(**self._kwargs, **kwargs)
 
     def register_hook(self, hook: BaseHook):
         self._hooks.append(hook)
-
-    @property
-    def _public_dict(self):
-        return {k: v for k, v in self.__dict__.items() if not k.startswith('_')}

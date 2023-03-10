@@ -24,30 +24,32 @@ class EpochBasedRunner(BaseRunner):
 
     def __init__(
         self,
-        base_model: nn.Module,
-        model: nn.Module,
-        criterion: nn.Module,
-        data: Iterable[Dict[str, Tensor]],
-        metrics: MetricCollection,
-        max_epochs: int,
+        # base_model: nn.Module,
+        # model: nn.Module,
+        # criterion: nn.Module,
+        # data: Iterable[Dict[str, Tensor]],
+        # metrics: MetricCollection,
+        # max_epochs: int,
 
-        # Auto fill
-        device: torch.device,
+        # # Auto fill
+        # device: torch.device,
         hooks: list,
         forward_fn: Callable = default_forward_fn,
         **kwargs
     ) -> None:
         super().__init__(hooks, **kwargs)
 
-        self.base_model = base_model
-        self.model = model
-        self.criterion = criterion
-        self.data = data
-        self.device = device
-        self.metrics = metrics
-        self.epoch_length = len(data)
-        self.max_epochs = max_epochs
+        # self.base_model = base_model
+        # self.model = model
+        # self.criterion = criterion
+        # self.data = data
+        # self.device = device
+        # self.metrics = metrics
+        # self.max_iters = len(data)
+        # self.max_epochs = max_epochs
         self._forward_fn = forward_fn
+
+        self.call_hook('on_init')
 
     def step(self, epoch: int, stage: str = ''):
         self.call_hook('before_epoch', epoch=epoch, stage=stage)
