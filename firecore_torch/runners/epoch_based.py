@@ -45,7 +45,7 @@ class EpochBasedRunner(BaseRunner):
         self.data = data
         self.device = device
         self.metrics = metrics
-        self.max_iters = len(data)
+        self.epoch_length = len(data)
         self.max_epochs = max_epochs
         self.forward_fn = forward_fn
 
@@ -90,10 +90,10 @@ class EpochBasedRunner(BaseRunner):
                 **losses
             )
 
-            # import ipdb; ipdb.set_trace()
-            self.metrics.update(
-                **losses, **outputs, **batch_on_device
-            )
+            with torch.inference_mode():
+                self.metrics.update(
+                    **losses, **outputs, **batch_on_device
+                )
 
             self.call_hook(
                 'after_iter',

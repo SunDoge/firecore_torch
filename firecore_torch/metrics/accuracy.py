@@ -26,7 +26,7 @@ class Accuracy(BaseMetric):
 
         corrects = F.topk_correct(output, target, topk=self._topk)
 
-        self._sum.add_(torch.as_tensor(corrects))
+        self._sum.add_(torch.as_tensor(corrects, device=device))
         self._count.add_(batch_size)
 
     def compute(self):

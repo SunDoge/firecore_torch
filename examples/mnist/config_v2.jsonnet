@@ -78,6 +78,7 @@
         _partial: 'examples.mnist.utils.Mnist',
         root: 'data',
         train: false,
+        download: true,
         transform: null,
       },
       loader: {
