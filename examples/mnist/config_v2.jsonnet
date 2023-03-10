@@ -1,6 +1,6 @@
 {
   base: {
-    batch_size: 32,
+    batch_size: 64,
     num_workers: 0,
     max_epochs: 14,
   },
@@ -119,7 +119,7 @@
     ],
   },
   plans: [
-    // { key: 'train', interval: 10 },
-    { key: 'test', interval: 10 },
+    { key: 'train', interval: 1 },
+    { key: 'test', interval: 1 },
   ],
 }

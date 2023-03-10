@@ -25,4 +25,5 @@ class InferenceHook(BaseHook):
         self._inference_mode_raii_guard = torch._C._InferenceMode(True)
 
     def after_epoch(self, **kwargs):
+        logger.info('exit inference mode')
         del self._inference_mode_raii_guard

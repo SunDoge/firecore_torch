@@ -51,7 +51,7 @@ class EpochBasedRunner(BaseRunner):
 
     def step(self, epoch: int, stage: str = ''):
         self.call_hook('before_epoch', epoch=epoch, stage=stage)
-        for batch_idx, batch in enumerate(self.data):
+        for batch_idx, batch in enumerate(self.data, start=1):
             self.call_hook(
                 'before_iter',
                 epoch=epoch,
@@ -108,14 +108,11 @@ class EpochBasedRunner(BaseRunner):
         if dist.is_available() and dist.is_initialized():
             self.metrics.sync().wait()
 
-        metric_outputs = self.metrics.compute()
+        with torch.inference_mode():
+            metric_outputs = self.metrics.compute()
         self.call_hook(
             'after_epoch',
             epoch=epoch,
             stage=stage,
             metric_outputs=metric_outputs
         )
-
-    def run_iter(self, batch: Dict[str, Tensor], epoch: int, batch_idx: int):
-        pass
-        # return outputs, losses
