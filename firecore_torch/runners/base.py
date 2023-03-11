@@ -24,3 +24,15 @@ class BaseRunner:
 
     def register_hook(self, hook: BaseHook):
         self._hooks.append(hook)
+
+
+class BaseRunner2:
+
+    def __init__(self, **kwargs) -> None:
+        self._kwargs = kwargs
+
+    def step(self, epoch: int):
+        pass
+
+    def call_method(self, func, **kwargs):
+        return func(**self.__dict__, **self._kwargs, **kwargs)

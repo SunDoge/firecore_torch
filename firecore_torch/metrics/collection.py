@@ -3,14 +3,26 @@ from typing import List, Dict
 import torch
 import logging
 from torch import Tensor
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 
 class MetricCollection:
 
-    def __init__(self, metrics: Dict[str, BaseMetric]) -> None:
+    def __init__(
+        self,
+        metrics: Dict[str, BaseMetric],
+        partial_keys: Optional[List[str]] = None,
+    ) -> None:
+
+        # Compute all metrics by default
+        if not partial_keys:
+            partial_keys = list(metrics.keys())
+            logger.info('no partial keys, use all metrics by default')
+
         self._metrics = metrics
+        self._partial_keys = partial_keys
 
     def update(self, **kwargs):
         for metric in self._metrics.values():
@@ -36,3 +48,6 @@ class MetricCollection:
         for key in keys:
             res.update(self._metrics[key].compute_adapted())
         return res
+
+    def compute_partial(self) -> Dict[str, Tensor]:
+        return self.compute_by_keys(self._partial_keys)
