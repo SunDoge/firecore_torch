@@ -55,7 +55,9 @@ class EpochBasedRunner(BaseRunner):
         self.call_hook('on_init')
 
     def step(self, epoch: int, stage: str = ''):
+        self.metrics.reset()
         self.call_hook('before_epoch', epoch=epoch, stage=stage)
+
         for batch_idx, batch in enumerate(self.data_source, start=1):
             self.call_hook(
                 'before_iter',
@@ -97,14 +99,12 @@ class EpochBasedRunner(BaseRunner):
                 self.metrics.update(
                     **losses, **outputs, **batch_on_device
                 )
-                metric_outputs = self.metrics.compute_partial()
 
             self.call_hook(
                 'after_iter',
                 epoch=epoch,
                 batch_idx=batch_idx,
                 stage=stage,
-                metric_outputs=metric_outputs,
                 **batch_on_device,
                 **outputs,
                 **losses

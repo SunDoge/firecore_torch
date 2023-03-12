@@ -111,7 +111,7 @@ def main():
             cfg[key]
         )(**shared)
 
-    for epoch in range(2):
+    for epoch in range(1, 2 + 1):
         for plan in plans:
             if epoch % plan['interval'] == 0:
                 workflow = workflows[plan['key']]

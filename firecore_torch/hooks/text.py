@@ -3,6 +3,7 @@ from firecore_torch.metrics import MetricCollection
 import logging
 from typing import List, Dict, TypedDict, Optional
 from torch import Tensor
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,8 @@ class TextLoggerHook(BaseHook):
     def after_iter(self, metrics: MetricCollection, batch_idx: int, epoch_length: int, **kwargs):
         if batch_idx > 0 and batch_idx % self._interval != 0:
             return
-        metric_outputs = metrics.compute_by_keys(self._metric_keys)
+        with torch.inference_mode():
+            metric_outputs = metrics.compute_by_keys(self._metric_keys)
         formatted_outputs = self._format_metrics(metric_outputs)
         prefix = f'{batch_idx}/{epoch_length}'
         logger.info('{} {}'.format(prefix, ' '.join(formatted_outputs)))

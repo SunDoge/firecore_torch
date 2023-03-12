@@ -13,16 +13,8 @@ class MetricCollection:
     def __init__(
         self,
         metrics: Dict[str, BaseMetric],
-        partial_keys: Optional[List[str]] = None,
     ) -> None:
-
-        # Compute all metrics by default
-        if not partial_keys:
-            partial_keys = list(metrics.keys())
-            logger.info('no partial keys, use all metrics by default')
-
         self._metrics = metrics
-        self._partial_keys = partial_keys
 
     def update(self, **kwargs):
         for metric in self._metrics.values():
@@ -40,7 +32,7 @@ class MetricCollection:
 
     def reset(self):
         logger.debug('Reset all metrics', metrics=self._metrics)
-        for metric in self._metrics:
+        for name, metric in self._metrics.items():
             metric.reset()
 
     def compute_by_keys(self, keys: List[str]) -> Dict[str, Tensor]:
@@ -48,6 +40,3 @@ class MetricCollection:
         for key in keys:
             res.update(self._metrics[key].compute_adapted())
         return res
-
-    def compute_partial(self) -> Dict[str, Tensor]:
-        return self.compute_by_keys(self._partial_keys)
