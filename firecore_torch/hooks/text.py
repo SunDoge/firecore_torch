@@ -15,7 +15,9 @@ class FmtCfg(TypedDict):
 class TextLoggerHook(BaseHook):
 
     # TODO: change metric_keys to other name
-    def __init__(self,  fmt: List[FmtCfg], interval: int = 100, metric_keys: Optional[List[str]] = None) -> None:
+    def __init__(
+        self,
+            fmt: List[FmtCfg], interval: int = 100, metric_keys: Optional[List[str]] = None) -> None:
         """
         Args:
             metric_keys: select keys when itering, default: ['loss']
@@ -29,7 +31,7 @@ class TextLoggerHook(BaseHook):
         self._fmt = fmt
         self._metric_keys = metric_keys
 
-    def after_epoch(self, metrics: MetricCollection, epoch: int, metric_outputs: Dict[str, Tensor], max_epochs: int, **kwargs):
+    def after_epoch(self, epoch: int, metric_outputs: Dict[str, Tensor], max_epochs: int, **kwargs):
         formatted_outputs = self._format_metrics(metric_outputs)
         prefix = f'{epoch}/{max_epochs}'
         logger.info('{} {}'.format(prefix, ' '.join(formatted_outputs)))

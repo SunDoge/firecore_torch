@@ -20,7 +20,7 @@ class BaseRunner:
             self.call_method(getattr(hook, method), **kwargs)
 
     def call_method(self, func, **kwargs):
-        return func(**self._kwargs, **kwargs)
+        return func(**self.__dict__, **self._kwargs, **kwargs)
 
     def register_hook(self, hook: BaseHook):
         self._hooks.append(hook)

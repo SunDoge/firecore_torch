@@ -37,7 +37,7 @@ def main():
             torch.nn.MSELoss(),
             in_rules={'output': 'output', 'target': 'y'}
         ),
-        data=data,
+        data_source=data,
         metrics=MetricCollection(dict(
             loss=Average(
                 in_rules={'output': 'loss', 'target': 'y'},

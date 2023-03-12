@@ -20,11 +20,11 @@ class TrainingHook(BaseHook):
         assert update_lr in ['epoch', 'iter', 'never'], update_lr
         self._update_lr = update_lr
 
-    def before_epoch(self, model: nn.Module, data, epoch: int, **kwargs):
-        if isinstance(data, DataLoader):
-            if isinstance(data.sampler, DistributedSampler):
+    def before_epoch(self, model: nn.Module, data_source, epoch: int, **kwargs):
+        if isinstance(data_source, DataLoader):
+            if isinstance(data_source.sampler, DistributedSampler):
                 logger.info('data.sampler.set_epoch: {}'.format(epoch))
-                data.sampler.set_epoch(epoch)
+                data_source.sampler.set_epoch(epoch)
 
         logger.info('model.train()')
         model.train()

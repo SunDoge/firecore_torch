@@ -33,7 +33,7 @@
 
   train: {
     _partial: 'firecore_torch.runners.EpochBasedRunner',
-    data: {
+    data_source: {
       _call: 'firecore_torch.helpers.data.make_data',
       transform: {
         _call: 'examples.mnist.utils.train_transform',
@@ -69,7 +69,7 @@
   },
   test: {
     _partial: 'firecore_torch.runners.EpochBasedRunner',
-    data: {
+    data_source: {
       _call: 'firecore_torch.helpers.data.make_data',
       transform: {
         _call: 'examples.mnist.utils.test_transform',

@@ -24,36 +24,39 @@ class EpochBasedRunner(BaseRunner):
 
     def __init__(
         self,
-        # base_model: nn.Module,
-        # model: nn.Module,
-        # criterion: nn.Module,
-        # data: Iterable[Dict[str, Tensor]],
-        # metrics: MetricCollection,
-        # max_epochs: int,
+        base_model: nn.Module,
+        model: nn.Module,
+        criterion: nn.Module,
+        data_source: Iterable[Dict[str, Tensor]],
+        metrics: MetricCollection,
+        max_epochs: int,
 
-        # # Auto fill
-        # device: torch.device,
+        # Auto fill
+        device: torch.device,
         hooks: list,
         forward_fn: Callable = default_forward_fn,
         **kwargs
     ) -> None:
         super().__init__(hooks, **kwargs)
 
-        # self.base_model = base_model
-        # self.model = model
-        # self.criterion = criterion
-        # self.data = data
-        # self.device = device
-        # self.metrics = metrics
-        # self.max_iters = len(data)
-        # self.max_epochs = max_epochs
+        self.base_model = base_model
+        self.model = model
+        self.criterion = criterion
+        self.data_source = data_source
+        self.device = device
+        self.metrics = metrics
+
+        # TODO: better epoch_length
+        self.epoch_length = len(data_source)
+        self.max_epochs = max_epochs
+
         self._forward_fn = forward_fn
 
         self.call_hook('on_init')
 
     def step(self, epoch: int, stage: str = ''):
         self.call_hook('before_epoch', epoch=epoch, stage=stage)
-        for batch_idx, batch in enumerate(self.data, start=1):
+        for batch_idx, batch in enumerate(self.data_source, start=1):
             self.call_hook(
                 'before_iter',
                 epoch=epoch,
@@ -75,8 +78,8 @@ class EpochBasedRunner(BaseRunner):
                 **batch_on_device
             )
 
-            outputs, losses = self._forward_fn(
-                **self._public_dict,
+            outputs, losses = self.call_method(
+                self._forward_fn,
                 **batch_on_device
             )
 
@@ -94,12 +97,14 @@ class EpochBasedRunner(BaseRunner):
                 self.metrics.update(
                     **losses, **outputs, **batch_on_device
                 )
+                metric_outputs = self.metrics.compute_partial()
 
             self.call_hook(
                 'after_iter',
                 epoch=epoch,
                 batch_idx=batch_idx,
                 stage=stage,
+                metric_outputs=metric_outputs,
                 **batch_on_device,
                 **outputs,
                 **losses
@@ -119,12 +124,3 @@ class EpochBasedRunner(BaseRunner):
             stage=stage,
             metric_outputs=metric_outputs
         )
-        # gc.collect()
-
-    def run_iter(self, batch: Dict[str, Tensor], epoch: int, batch_idx: int):
-        pass
-        # return outputs, losses
-
-
-
-
