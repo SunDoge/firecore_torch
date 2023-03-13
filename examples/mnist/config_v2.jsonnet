@@ -39,7 +39,7 @@
         _call: 'examples.mnist.utils.train_transform',
       },
       dataset: {
-        _partial: 'examples.mnist.utils.Mnist',
+        _partial: 'torchvision.datasets.MNIST',
         root: 'data',
         train: true,
         download: true,
@@ -53,6 +53,9 @@
         shuffle: true,
       },
     },
+    batch_cfg: {
+      names: ['image', 'target'],
+    },
     metrics: $.test.metrics,
     hooks: [
       {
@@ -62,6 +65,8 @@
         _call: 'firecore_torch.hooks.TextLoggerHook',
         fmt: [
           { key: 'loss', fmt: ':.4f' },
+          { key: 'acc1', fmt: ':.4f' },
+          { key: 'acc5', fmt: ':.4f' },
         ],
         metric_keys: ['loss'],
       },
@@ -75,7 +80,7 @@
         _call: 'examples.mnist.utils.test_transform',
       },
       dataset: {
-        _partial: 'examples.mnist.utils.Mnist',
+        _partial: 'torchvision.datasets.MNIST',
         root: 'data',
         train: false,
         download: true,
@@ -88,6 +93,9 @@
         batch_size: $.base.batch_size * 2,
         shuffle: false,
       },
+    },
+    batch_cfg: {
+      names: ['image', 'target'],
     },
     metrics: {
       _call: 'firecore_torch.metrics.MetricCollection',

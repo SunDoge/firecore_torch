@@ -40,7 +40,7 @@ class TextLoggerHook(BaseHook):
     def after_iter(self, metrics: MetricCollection, batch_idx: int, epoch_length: int, **kwargs):
         if batch_idx > 0 and batch_idx % self._interval != 0:
             return
-        with torch.inference_mode():
+        with torch.no_grad():
             metric_outputs = metrics.compute_by_keys(self._metric_keys)
         formatted_outputs = self._format_metrics(metric_outputs)
         prefix = f'{batch_idx}/{epoch_length}'
