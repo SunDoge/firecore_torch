@@ -11,5 +11,5 @@ def make_dist_model(base_model: nn.Module, device: torch.device) -> DistributedD
     device_ids = None
     if device.type == 'cuda':
         device_ids = [device]
-        logger.info('set device_ids', device_ids=device_ids)
+        logger.info('set device_ids=%s', device_ids)
     return DistributedDataParallel(base_model, device_ids=device_ids)
