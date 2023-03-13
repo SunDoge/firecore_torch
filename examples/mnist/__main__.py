@@ -123,17 +123,10 @@ def main():
         key = plan['key']
         workflows[key] = firecore.resolve(
             cfg[key]
-        )(**shared)
+        )(**shared, stage=key)
 
     for epoch in range(1, 2 + 1):
         for plan in plans:
             if epoch % plan['interval'] == 0:
                 workflow = workflows[plan['key']]
                 workflow.step(epoch)
-
-    # snapshot = tracemalloc.take_snapshot()
-    # top_stats = snapshot.statistics('lineno')
-
-    # print("[ Top 10 ]")
-    # for stat in top_stats[:10]:
-    #     print(stat)
