@@ -14,6 +14,7 @@ from torch import Tensor
 from firecore_torch.runners import Trainer
 from firecore_torch import helpers
 import logging
+from torch.utils.tensorboard import SummaryWriter
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,8 @@ logger = logging.getLogger(__name__)
 class Args(ta.TypedArgs):
     config: Path = ta.add_argument('-c', '--config', type=Path, required=True)
     device: str = ta.add_argument('-d', '--device', default='cpu')
+    work_dir: Path = ta.add_argument(
+        '-w', '--work-dir', type=Path, required=True)
 
 
 class Net(BaseModel):
@@ -64,9 +67,15 @@ def main():
     # tracemalloc.start()
 
     # firecore.logging.init(level='INFO')
-    firecore.logging.init()
 
     args = Args.from_args()
+
+    args.work_dir.mkdir(parents=True)
+
+    firecore.logging.init(
+        filename=str(args.work_dir / 'run.log'),
+        level=logging.INFO,
+    )
 
     device = torch.device(args.device)
     backend = get_backend(device.type)
@@ -92,6 +101,10 @@ def main():
     lr_scheduler = firecore.resolve(cfg['lr_scheduler'], optimizer=optimizer)
     ic(lr_scheduler)
 
+    summary_writer = SummaryWriter(
+        log_dir=str(args.work_dir/'tf_logs')
+    )
+
     plans: List[Dict] = cfg['plans']
 
     shared = dict(
@@ -101,7 +114,8 @@ def main():
         optimizer=optimizer,
         lr_scheduler=lr_scheduler,
         device=device,
-        max_epochs=cfg['base']['max_epochs']
+        max_epochs=cfg['base']['max_epochs'],
+        summary_writer=summary_writer,
     )
 
     workflows: Dict[str, Trainer] = {}

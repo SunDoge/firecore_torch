@@ -23,9 +23,7 @@ class TensorboardHook(BaseHook):
         for key, value in metric_outputs.items():
             if value.ndim == 0:
                 logger.info(
-                    'summary_writer.add_scaler(key={}, epoch={})'.format(
-                        key, epoch
-                    )
+                    f'summary_writer.add_scaler(key={key}, epoch={epoch})'
                 )
                 summary_writer.add_scalar(
                     '{}/{}'.format(stage, key),
