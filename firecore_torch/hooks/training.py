@@ -23,7 +23,7 @@ class TrainingHook(BaseHook):
     def before_epoch(self, model: nn.Module, data_source, epoch: int, **kwargs):
         if isinstance(data_source, DataLoader):
             if isinstance(data_source.sampler, DistributedSampler):
-                logger.info('data.sampler.set_epoch: {}'.format(epoch))
+                logger.info('data_source.sampler.set_epoch: {}'.format(epoch))
                 data_source.sampler.set_epoch(epoch)
 
         logger.info('model.train()')

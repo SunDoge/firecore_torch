@@ -3,7 +3,7 @@ from typing import List, Dict
 import torch
 import logging
 from torch import Tensor
-from typing import Optional
+from typing import Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +20,10 @@ class MetricCollection:
         for metric in self._metrics.values():
             metric.update_adapted(**kwargs)
 
-    def compute(self):
+    def compute(self, fmt: bool = False) -> Union[Dict[str, Tensor], Dict[str, str]]:
         out = {}
         for metric in self._metrics.values():
-            out.update(metric.compute_adapted())
+            out.update(metric.compute_adapted(fmt=fmt))
         return out
 
     def sync(self) -> torch.futures.Future:
@@ -40,8 +40,8 @@ class MetricCollection:
         for name, metric in self._metrics.items():
             metric.reset()
 
-    def compute_by_keys(self, keys: List[str]) -> Dict[str, Tensor]:
+    def compute_by_keys(self, keys: List[str], fmt: bool = False) -> Union[Dict[str, Tensor], Dict[str, str]]:
         res = {}
         for key in keys:
-            res.update(self._metrics[key].compute_adapted())
+            res.update(self._metrics[key].compute_adapted(fmt=fmt))
         return res

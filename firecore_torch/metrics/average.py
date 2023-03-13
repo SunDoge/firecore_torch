@@ -7,8 +7,8 @@ import torch.distributed as dist
 
 class Average(BaseMetric):
 
-    def __init__(self, in_rules: Dict[str, str] = {}, out_rules: Dict[str, str] = {}) -> None:
-        super().__init__(in_rules, out_rules)
+    def __init__(self, fmt='.4f',  in_rules: Dict[str, str] = {}, out_rules: Dict[str, str] = {}) -> None:
+        super().__init__(fmt, in_rules, out_rules)
         self._sum = torch.tensor(0., dtype=torch.float)
         self._count = torch.tensor(0, dtype=torch.long)
         self._val = torch.tensor(0., dtype=torch.float)
