@@ -34,8 +34,8 @@ class TextLoggerHook(BaseHook):
         self._metric_keys = metric_keys
 
     def after_epoch(self, epoch: int, metrics: MetricCollection, max_epochs: int, stage: str, **kwargs):
-        with torch.no_grad():
-            metric_outputs = metrics.compute(fmt=True)
+
+        metric_outputs = metrics.compute(fmt=True)
         formatted_outputs = self._format_metrics(metric_outputs)
         prefix = f'{stage} {epoch}/{max_epochs}'
         logger.info('{} {}'.format(prefix, ' '.join(formatted_outputs)))
@@ -43,9 +43,8 @@ class TextLoggerHook(BaseHook):
     def after_iter(self, metrics: MetricCollection, batch_idx: int, epoch_length: int, stage: str, **kwargs):
         if batch_idx > 0 and batch_idx % self._interval != 0:
             return
-        with torch.no_grad():
-            metric_outputs = metrics.compute_by_keys(
-                self._metric_keys, fmt=True)
+
+        metric_outputs = metrics.compute_by_keys(self._metric_keys, fmt=True)
         formatted_outputs = self._format_metrics(metric_outputs)
         prefix = f'{stage} {batch_idx}/{epoch_length}'
         logger.info('{} {}'.format(prefix, ' '.join(formatted_outputs)))

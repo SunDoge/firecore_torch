@@ -66,10 +66,9 @@ class EpochBasedRunner(BaseRunner):
                 'before_iter',
                 epoch=epoch,
                 batch_idx=batch_idx,
-
             )
 
-            batch_on_device = self.call_method(
+            batch_on_device, batch_size = self.call_method(
                 self._batch_processor,
                 batch=batch,
             )
@@ -78,6 +77,7 @@ class EpochBasedRunner(BaseRunner):
                 'before_forward',
                 epoch=epoch,
                 batch_idx=batch_idx,
+                batch_size=batch_size,
                 **batch_on_device
             )
 
@@ -90,15 +90,18 @@ class EpochBasedRunner(BaseRunner):
                 'after_forward',
                 epoch=epoch,
                 batch_idx=batch_idx,
+                batch_size=batch_size,
                 **batch_on_device,
                 **outputs,
                 **losses
             )
 
-            with torch.no_grad():
-                self.metrics.update(
-                    **losses, **outputs, **batch_on_device
-                )
+            self.metrics.update(
+                batch_size=batch_size,
+                **losses,
+                **outputs,
+                **batch_on_device
+            )
 
             self.call_hook(
                 'after_iter',
@@ -112,10 +115,7 @@ class EpochBasedRunner(BaseRunner):
         if dist.is_available() and dist.is_initialized():
             self.metrics.sync().wait()
 
-        with torch.no_grad():
-            metric_outputs = self.metrics.compute()
         self.call_hook(
             'after_epoch',
             epoch=epoch,
-            metric_outputs=metric_outputs
         )

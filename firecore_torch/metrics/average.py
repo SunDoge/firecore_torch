@@ -13,9 +13,8 @@ class Average(BaseMetric):
         self._count = torch.tensor(0, dtype=torch.long)
         self._val = torch.tensor(0., dtype=torch.float)
 
-    def _update(self, output: Tensor, target: Tensor, **kwargs):
+    def _update(self, output: Tensor, n: int, **kwargs):
         # print(output)
-        batch_size = target.size(0)
         device = output.device
 
         if self._val.device != device:
@@ -25,7 +24,7 @@ class Average(BaseMetric):
 
         self._val.copy_(output)
         self._sum.add_(output)
-        self._count.add_(batch_size)
+        self._count.add_(n)
 
     def _compute(self):
         avg = self._sum / self._count

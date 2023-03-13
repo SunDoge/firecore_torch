@@ -4,6 +4,7 @@ import torch
 import logging
 from torch import Tensor
 from typing import Optional, Union
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -16,10 +17,12 @@ class MetricCollection:
     ) -> None:
         self._metrics = metrics
 
+    @torch.inference_mode()
     def update(self, **kwargs):
         for metric in self._metrics.values():
             metric.update_adapted(**kwargs)
 
+    @torch.inference_mode()
     def compute(self, fmt: bool = False) -> Union[Dict[str, Tensor], Dict[str, str]]:
         out = {}
         for metric in self._metrics.values():

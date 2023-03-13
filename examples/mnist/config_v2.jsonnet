@@ -65,6 +65,9 @@
         _call: 'firecore_torch.hooks.TextLoggerHook',
         metric_keys: ['loss'],
       },
+      {
+        _call: 'firecore_torch.hooks.TbForMetricsHook',
+      },
     ],
   },
   test: {
@@ -97,7 +100,7 @@
       metrics: {
         loss: {
           _call: 'firecore_torch.metrics.Average',
-          in_rules: { output: 'loss', target: 'target' },
+          in_rules: { output: 'loss', n: 'batch_size' },
           out_rules: { loss: 'avg' },
         },
         acc: {
@@ -113,6 +116,9 @@
       {
         _call: 'firecore_torch.hooks.TextLoggerHook',
         metric_keys: ['loss', 'acc'],
+      },
+      {
+        _call: 'firecore_torch.hooks.TbForMetricsHook',
       },
     ],
   },

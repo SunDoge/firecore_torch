@@ -37,6 +37,9 @@ class BaseMetric:
         return self._cached_result
 
     def compute_adapted(self, fmt: bool = False) -> Union[Dict[str, Tensor], Dict[str, str]]:
+        """
+        FIXME: not a very good idea to use fmt
+        """
         out = self.compute()
         assert isinstance(out, dict)
         new_out = adapt(out, self._out_rules)
