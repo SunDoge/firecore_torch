@@ -39,7 +39,7 @@
         _call: 'examples.mnist.utils.train_transform',
       },
       dataset: {
-        _partial: 'examples.mnist.utils.Mnist',
+        _partial: 'torchvision.datasets.MNIST',
         root: 'data',
         train: true,
         download: true,
@@ -52,6 +52,9 @@
         batch_size: $.base.batch_size,
         shuffle: true,
       },
+    },
+    batch_cfg: {
+      names: ['image', 'target'],
     },
     metrics: $.test.metrics,
     hooks: [
@@ -77,7 +80,7 @@
         _call: 'examples.mnist.utils.test_transform',
       },
       dataset: {
-        _partial: 'examples.mnist.utils.Mnist',
+        _partial: 'torchvision.datasets.MNIST',
         root: 'data',
         train: false,
         download: true,
@@ -90,6 +93,9 @@
         batch_size: $.base.batch_size * 2,
         shuffle: false,
       },
+    },
+    batch_cfg: {
+      names: ['image', 'target'],
     },
     metrics: {
       _call: 'firecore_torch.metrics.MetricCollection',

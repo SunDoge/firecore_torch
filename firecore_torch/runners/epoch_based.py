@@ -6,6 +6,7 @@ from firecore_torch import helpers
 from firecore_torch.metrics import MetricCollection
 import torch.distributed as dist
 from icecream import ic
+from .batch_processor import BatchProcessor
 
 TensorDict = Dict[str, Tensor]
 
@@ -30,6 +31,7 @@ class EpochBasedRunner(BaseRunner):
         data_source: Iterable[Dict[str, Tensor]],
         metrics: MetricCollection,
         max_epochs: int,
+        batch_cfg: dict,
 
         # Auto fill
         device: torch.device,
@@ -51,6 +53,7 @@ class EpochBasedRunner(BaseRunner):
         self.max_epochs = max_epochs
 
         self._forward_fn = forward_fn
+        self._batch_processor = BatchProcessor(**batch_cfg)
 
         self.call_hook('on_init')
 
@@ -63,13 +66,13 @@ class EpochBasedRunner(BaseRunner):
                 'before_iter',
                 epoch=epoch,
                 batch_idx=batch_idx,
-                **batch
+
             )
-            # TODO: maybe a filter
-            batch_on_device = {
-                k: v.to(self.device, non_blocking=True)
-                for k, v in batch.items()
-            }
+
+            batch_on_device = self.call_method(
+                self._batch_processor,
+                batch=batch,
+            )
 
             self.call_hook(
                 'before_forward',
