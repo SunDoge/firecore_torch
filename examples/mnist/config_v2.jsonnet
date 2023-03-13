@@ -62,6 +62,8 @@
         _call: 'firecore_torch.hooks.TextLoggerHook',
         fmt: [
           { key: 'loss', fmt: ':.4f' },
+          { key: 'acc1', fmt: ':.4f' },
+          { key: 'acc5', fmt: ':.4f' },
         ],
         metric_keys: ['loss'],
       },

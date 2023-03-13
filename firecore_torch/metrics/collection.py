@@ -28,7 +28,12 @@ class MetricCollection:
 
     def sync(self) -> torch.futures.Future:
         logger.debug('Sync all metrics', metrics=self._metrics)
-        return torch.futures.collect_all([m.sync() for m in self._metrics.values()])
+        futs = []
+        for name, metric in self._metrics.items():
+            fut = metric.sync()
+            if fut is not None:
+                futs.append(fut)
+        return torch.futures.collect_all(futs)
 
     def reset(self):
         logger.debug('Reset all metrics', metrics=self._metrics)

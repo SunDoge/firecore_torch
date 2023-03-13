@@ -54,16 +54,15 @@ class EpochBasedRunner(BaseRunner):
 
         self.call_hook('on_init')
 
-    def step(self, epoch: int, stage: str = ''):
+    def step(self, epoch: int):
         self.metrics.reset()
-        self.call_hook('before_epoch', epoch=epoch, stage=stage)
+        self.call_hook('before_epoch', epoch=epoch)
 
         for batch_idx, batch in enumerate(self.data_source, start=1):
             self.call_hook(
                 'before_iter',
                 epoch=epoch,
                 batch_idx=batch_idx,
-                stage=stage,
                 **batch
             )
             # TODO: maybe a filter
@@ -76,7 +75,6 @@ class EpochBasedRunner(BaseRunner):
                 'before_forward',
                 epoch=epoch,
                 batch_idx=batch_idx,
-                stage=stage,
                 **batch_on_device
             )
 
@@ -89,7 +87,6 @@ class EpochBasedRunner(BaseRunner):
                 'after_forward',
                 epoch=epoch,
                 batch_idx=batch_idx,
-                stage=stage,
                 **batch_on_device,
                 **outputs,
                 **losses
@@ -104,14 +101,10 @@ class EpochBasedRunner(BaseRunner):
                 'after_iter',
                 epoch=epoch,
                 batch_idx=batch_idx,
-                stage=stage,
                 **batch_on_device,
                 **outputs,
                 **losses
             )
-
-            if batch_idx == 1000:
-                break
 
         if dist.is_available() and dist.is_initialized():
             self.metrics.sync().wait()
@@ -121,6 +114,5 @@ class EpochBasedRunner(BaseRunner):
         self.call_hook(
             'after_epoch',
             epoch=epoch,
-            stage=stage,
             metric_outputs=metric_outputs
         )

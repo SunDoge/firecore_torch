@@ -16,7 +16,7 @@ class Accuracy(BaseMetric):
         self._count = torch.tensor(0, dtype=torch.long)
         self._sum = torch.zeros(len(topk), dtype=torch.float)
 
-    def update(self, output: Tensor, target: Tensor, **kwargs):
+    def _update(self, output: Tensor, target: Tensor, **kwargs):
         device = output.device
         batch_size = target.size(0)
 
@@ -29,7 +29,7 @@ class Accuracy(BaseMetric):
         self._sum.add_(torch.as_tensor(corrects, device=device))
         self._count.add_(batch_size)
 
-    def compute(self):
+    def _compute(self):
         result = {}
 
         acc = self._sum / self._count
@@ -38,7 +38,7 @@ class Accuracy(BaseMetric):
             result['acc{}'.format(k)] = acc[i]
         return result
 
-    def sync(self) -> torch.Future:
+    def sync(self) -> torch.futures.Future:
         return torch.futures.collect_all([
             dist.all_reduce(self._sum, op=dist.ReduceOp.SUM,
                             async_op=True).get_future(),
@@ -46,6 +46,6 @@ class Accuracy(BaseMetric):
                             async_op=True).get_future(),
         ])
 
-    def reset(self):
+    def _reset(self):
         self._sum.fill_(0.)
         self._count.fill_(0)
