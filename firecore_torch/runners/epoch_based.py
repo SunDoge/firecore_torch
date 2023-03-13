@@ -7,6 +7,7 @@ from firecore_torch.metrics import MetricCollection
 import torch.distributed as dist
 from icecream import ic
 from .batch_processor import BatchProcessor
+from firecore_torch.helpers.meter import Meter
 
 TensorDict = Dict[str, Tensor]
 
@@ -41,15 +42,20 @@ class EpochBasedRunner(BaseRunner):
     ) -> None:
         super().__init__(hooks, **kwargs)
 
+        epoch_length = len(data_source)
+
         self.base_model = base_model
         self.model = model
         self.criterion = criterion
         self.data_source = data_source
         self.device = device
         self.metrics = metrics
+        self.eta_meter = Meter(
+            total=max_epochs * epoch_length
+        )
 
         # TODO: better epoch_length
-        self.epoch_length = len(data_source)
+        self.epoch_length = epoch_length
         self.max_epochs = max_epochs
 
         self._forward_fn = forward_fn
@@ -107,6 +113,7 @@ class EpochBasedRunner(BaseRunner):
                 'after_iter',
                 epoch=epoch,
                 batch_idx=batch_idx,
+                batch_size=batch_size,
                 **batch_on_device,
                 **outputs,
                 **losses

@@ -3,7 +3,10 @@ import time
 import datetime
 
 
-class Progress:
+class Meter:
+    """
+    TODO: move to firecore
+    """
 
     def __init__(
         self,
@@ -12,9 +15,6 @@ class Progress:
         self._total = total
         self._count = 0
         self._start_time = time.perf_counter()
-
-    def eta(self) -> float:
-        pass
 
     @property
     def count(self) -> int:
@@ -26,7 +26,7 @@ class Progress:
 
     @property
     def rate(self) -> float:
-        self.count / self.elapsed
+        return self.count / self.elapsed
 
     @property
     def remaining(self) -> float:
@@ -39,8 +39,20 @@ class Progress:
         return end_time - self._start_time
 
     @property
-    def eta_dt(self) -> datetime.datetime:
-        return datetime.datetime.now() + datetime.timedelta(seconds=self.remaining)
+    def eta_datetime(self) -> datetime.datetime:
+        return datetime.datetime.now() + self.remaining_timedelta
+
+    @property
+    def remaining_timedelta(self) -> datetime.timedelta:
+        return datetime.timedelta(seconds=self.remaining)
+
+    @property
+    def is_updated(self) -> bool:
+        return self.count > 0
 
     def step(self, n: int = 1):
         self._count += n
+
+    def reset(self):
+        self._count = 0
+        self._start_time = time.perf_counter()

@@ -16,6 +16,7 @@ from firecore_torch import helpers
 import logging
 from torch.utils.tensorboard import SummaryWriter
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -101,6 +102,8 @@ def main():
     lr_scheduler = firecore.resolve(cfg['lr_scheduler'], optimizer=optimizer)
     ic(lr_scheduler)
 
+    max_epochs: int = cfg['base']['max_epochs']
+
     summary_writer = SummaryWriter(
         log_dir=str(args.work_dir/'tf_logs')
     )
@@ -114,7 +117,7 @@ def main():
         optimizer=optimizer,
         lr_scheduler=lr_scheduler,
         device=device,
-        max_epochs=cfg['base']['max_epochs'],
+        max_epochs=max_epochs,
         summary_writer=summary_writer,
     )
 
