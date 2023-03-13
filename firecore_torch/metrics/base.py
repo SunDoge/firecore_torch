@@ -18,7 +18,8 @@ class BaseMetric:
     def __init__(self, in_rules: Dict[str, str] = {}, out_rules: Dict[str, str] = {}) -> None:
         self._in_rules = in_rules
         self._out_rules = out_rules
-        self.reset()
+        self._cached_result: Optional[Dict[str, Tensor]] = None
+        self._is_synced: bool = False
 
     def update(self, *args, **kwargs):
         self._cached_result = None
@@ -49,8 +50,8 @@ class BaseMetric:
             return self._sync()
 
     def reset(self):
-        self._cached_result: Optional[Dict[str, Tensor]] = None
-        self._is_synced: bool = False
+        self._cached_result = None
+        self._is_synced = False
         self._reset()
 
     def _update(self, output: Tensor, target: Tensor):

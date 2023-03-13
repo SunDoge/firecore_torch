@@ -31,7 +31,7 @@ class Average(BaseMetric):
         avg = self._sum / self._count
         return {'avg': avg, 'val': self._val}
 
-    def sync(self) -> torch.futures.Future:
+    def _sync(self) -> torch.futures.Future:
         return torch.futures.collect_all([
             dist.all_reduce(self._count, op=dist.ReduceOp.SUM,
                             async_op=True).get_future(),
