@@ -92,7 +92,7 @@ class EpochBasedRunner(BaseRunner):
                 **losses
             )
 
-            with torch.inference_mode():
+            with torch.no_grad():
                 self.metrics.update(
                     **losses, **outputs, **batch_on_device
                 )
@@ -109,7 +109,7 @@ class EpochBasedRunner(BaseRunner):
         if dist.is_available() and dist.is_initialized():
             self.metrics.sync().wait()
 
-        with torch.inference_mode():
+        with torch.no_grad():
             metric_outputs = self.metrics.compute()
         self.call_hook(
             'after_epoch',
