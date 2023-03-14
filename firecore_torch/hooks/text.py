@@ -4,7 +4,9 @@ import logging
 from typing import List, Dict, TypedDict, Optional
 from torch import Tensor
 import torch
-meter
+from firecore.meter import Meter
+
+
 logger = logging.getLogger(__name__)
 
 
