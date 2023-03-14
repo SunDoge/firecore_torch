@@ -6,7 +6,7 @@ from torch.utils.data.distributed import DistributedSampler
 import logging
 from typing import Optional
 from torch.optim.lr_scheduler import _LRScheduler as LrScheduler
-from firecore_torch.helpers.meter import Meter
+from firecore.meter import Meter
 
 logger = logging.getLogger(__name__)
 

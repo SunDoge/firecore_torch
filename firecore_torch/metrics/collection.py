@@ -37,8 +37,9 @@ class MetricCollection:
             if fut is not None:
                 futs.append(fut)
         return torch.futures.collect_all(futs)
-    
-    @torch.inference_mode() # Fix RuntimeError: Inplace update to inference tensor outside InferenceMode is not allowed
+
+    # Fix RuntimeError: Inplace update to inference tensor outside InferenceMode is not allowed
+    @torch.inference_mode()
     def reset(self):
         logger.debug('Reset all metrics', metrics=self._metrics)
         for name, metric in self._metrics.items():

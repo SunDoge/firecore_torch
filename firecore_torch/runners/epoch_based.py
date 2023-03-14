@@ -7,7 +7,7 @@ from firecore_torch.metrics import MetricCollection
 import torch.distributed as dist
 from icecream import ic
 from .batch_processor import BatchProcessor
-from firecore_torch.helpers.meter import Meter
+from firecore.meter import Meter
 
 TensorDict = Dict[str, Tensor]
 

@@ -4,8 +4,7 @@ import logging
 from typing import List, Dict, TypedDict, Optional
 from torch import Tensor
 import torch
-from firecore_torch.helpers.meter import Meter
-
+meter
 logger = logging.getLogger(__name__)
 
 
@@ -67,7 +66,7 @@ class TextLoggerHook(BaseHook):
         prefix = f'{stage} {batch_idx}/{epoch_length} {rate:.1f} spl/s'
 
         if eta_meter.is_updated:
-            prefix += ' eta: {}'.format(eta_meter.remaining_timedelta)
+            prefix += ' etr: {}'.format(eta_meter.remaining_timedelta)
 
         logger.info('{} {}'.format(prefix, ' '.join(formatted_outputs)))
 

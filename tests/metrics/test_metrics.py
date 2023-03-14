@@ -10,7 +10,7 @@ def test_avg():
         num_samples = 10
         x = torch.rand(num_samples)
         for val in x:
-            meter.update(val, val.unsqueeze(0))
+            meter.update(val, 1)
 
         result = meter.compute()
         assert torch.allclose(result['val'], x[-1])
