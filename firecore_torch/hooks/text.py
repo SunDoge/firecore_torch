@@ -4,13 +4,10 @@ import logging
 from typing import List, Dict, TypedDict, Optional
 from torch import Tensor
 import torch
+from firecore.meter import Meter
+
 
 logger = logging.getLogger(__name__)
-
-
-class FmtCfg(TypedDict):
-    key: str
-    fmt: str
 
 
 class TextLoggerHook(BaseHook):
@@ -18,7 +15,9 @@ class TextLoggerHook(BaseHook):
     # TODO: change metric_keys to other name
     def __init__(
         self,
-            fmt: List[FmtCfg], interval: int = 100, metric_keys: Optional[List[str]] = None) -> None:
+        interval: int = 100,
+        metric_keys: Optional[List[str]] = None
+    ) -> None:
         """
         Args:
             metric_keys: select keys when itering, default: ['loss']
@@ -29,35 +28,47 @@ class TextLoggerHook(BaseHook):
             metric_keys = ['loss']
 
         self._interval = interval
-        self._fmt = fmt
         self._metric_keys = metric_keys
+        self._rate_meter = Meter()
 
-    def after_epoch(self, epoch: int, metric_outputs: Dict[str, Tensor], max_epochs: int, **kwargs):
+    def before_epoch(self, **kwargs):
+        self._rate_meter.reset()
+
+    def after_epoch(self, epoch: int, metrics: MetricCollection, max_epochs: int, stage: str, **kwargs):
+
+        metric_outputs = metrics.compute(fmt=True)
         formatted_outputs = self._format_metrics(metric_outputs)
-        prefix = f'{epoch}/{max_epochs}'
+        rate = self._rate_meter.rate
+        prefix = f'{stage} {epoch}/{max_epochs} {rate:.1f} spl/s'
         logger.info('{} {}'.format(prefix, ' '.join(formatted_outputs)))
 
-    def after_iter(self, metrics: MetricCollection, batch_idx: int, epoch_length: int, **kwargs):
+    def after_iter(
+        self,
+        metrics: MetricCollection,
+        batch_idx: int,
+        epoch_length: int,
+        stage: str,
+        batch_size: int,
+        eta_meter: Meter,
+        **kwargs
+    ):
+        self._rate_meter.step(n=batch_size)
+
         if batch_idx > 0 and batch_idx % self._interval != 0:
             return
-        with torch.no_grad():
-            metric_outputs = metrics.compute_by_keys(self._metric_keys)
+
+        metric_outputs = metrics.compute_by_keys(self._metric_keys, fmt=True)
         formatted_outputs = self._format_metrics(metric_outputs)
-        prefix = f'{batch_idx}/{epoch_length}'
+        rate = self._rate_meter.rate
+        prefix = f'{stage} {batch_idx}/{epoch_length} {rate:.1f} spl/s'
+
+        if eta_meter.is_updated:
+            prefix += ' remaining: {}'.format(eta_meter.remaining_timedelta)
+
         logger.info('{} {}'.format(prefix, ' '.join(formatted_outputs)))
 
-    def _format_metrics(self, outputs: Dict[str, Tensor]) -> List[str]:
+    def _format_metrics(self, outputs: Dict[str, str]) -> List[str]:
         res = []
-        for fmt_cfg in self._fmt:
-            key = fmt_cfg['key']
-
-            if key not in outputs:
-                continue
-
-            fmt = fmt_cfg['fmt']
-            template = '{key}: {val' + fmt + '}'
-            tensor = outputs[key]
-            val = tensor.tolist()
-            fmt_str = template.format(key=key, val=val)
-            res.append(fmt_str)
+        for key, value in outputs.items():
+            res.append('{}: {}'.format(key, value))
         return res

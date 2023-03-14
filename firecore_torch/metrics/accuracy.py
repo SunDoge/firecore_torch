@@ -8,8 +8,8 @@ import torch.distributed as dist
 
 class Accuracy(BaseMetric):
 
-    def __init__(self, topk: List[int] = [1], in_rules: Dict[str, str] = {}, out_rules: Dict[str, str] = {}) -> None:
-        super().__init__(in_rules, out_rules)
+    def __init__(self, topk: List[int] = [1], fmt='.4f', in_rules: Dict[str, str] = {}, out_rules: Dict[str, str] = {}) -> None:
+        super().__init__(fmt, in_rules, out_rules)
 
         self._topk = topk
 

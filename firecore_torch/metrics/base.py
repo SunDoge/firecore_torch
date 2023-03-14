@@ -1,6 +1,6 @@
 from torch import Tensor
 import torch
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from firecore.adapter import adapt
 import logging
 
@@ -15,7 +15,13 @@ def make_empty_future():
 
 class BaseMetric:
 
-    def __init__(self, in_rules: Dict[str, str] = {}, out_rules: Dict[str, str] = {}) -> None:
+    def __init__(
+        self,
+        fmt: str = '.4f',
+        in_rules: Dict[str, str] = {},
+        out_rules: Dict[str, str] = {}
+    ) -> None:
+        self._fmt = fmt
         self._in_rules = in_rules
         self._out_rules = out_rules
         self._cached_result: Optional[Dict[str, Tensor]] = None
@@ -35,10 +41,18 @@ class BaseMetric:
             self._cached_result = self._compute()
         return self._cached_result
 
-    def compute_adapted(self):
+    def compute_adapted(self, fmt: bool = False) -> Union[Dict[str, Tensor], Dict[str, str]]:
+        """
+        FIXME: not a very good idea to use fmt
+        """
         out = self.compute()
         assert isinstance(out, dict)
         new_out = adapt(out, self._out_rules)
+
+        if fmt:
+            tmpl = "{:" + self._fmt + "}"
+            new_out = {k: tmpl.format(v) for k, v in new_out.items()}
+
         return new_out
 
     def sync(self) -> Optional[torch.futures.Future]:
@@ -53,6 +67,8 @@ class BaseMetric:
         self._cached_result = None
         self._is_synced = False
         self._reset()
+
+    
 
     def _update(self, output: Tensor, target: Tensor):
         """

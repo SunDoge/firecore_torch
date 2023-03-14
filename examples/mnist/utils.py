@@ -3,11 +3,11 @@ from torchvision import transforms
 from torch import nn
 
 
-class Mnist(Base):
+# class Mnist(Base):
 
-    def __getitem__(self, index: int):
-        image, target = super().__getitem__(index)
-        return dict(image=image, target=target)
+#     def __getitem__(self, index: int):
+#         image, target = super().__getitem__(index)
+#         return dict(image=image, target=target)
 
 
 def train_transform():

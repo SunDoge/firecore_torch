@@ -16,6 +16,7 @@ from firecore_torch import helpers
 import logging
 from torch.utils.tensorboard import SummaryWriter
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -101,6 +102,8 @@ def main():
     lr_scheduler = firecore.resolve(cfg['lr_scheduler'], optimizer=optimizer)
     ic(lr_scheduler)
 
+    max_epochs: int = cfg['base']['max_epochs']
+
     summary_writer = SummaryWriter(
         log_dir=str(args.work_dir/'tf_logs')
     )
@@ -114,8 +117,9 @@ def main():
         optimizer=optimizer,
         lr_scheduler=lr_scheduler,
         device=device,
-        max_epochs=cfg['base']['max_epochs'],
+        max_epochs=max_epochs,
         summary_writer=summary_writer,
+        work_dir=args.work_dir,
     )
 
     workflows: Dict[str, Trainer] = {}
@@ -123,17 +127,10 @@ def main():
         key = plan['key']
         workflows[key] = firecore.resolve(
             cfg[key]
-        )(**shared)
+        )(**shared, stage=key)
 
     for epoch in range(1, 2 + 1):
         for plan in plans:
             if epoch % plan['interval'] == 0:
                 workflow = workflows[plan['key']]
                 workflow.step(epoch)
-
-    # snapshot = tracemalloc.take_snapshot()
-    # top_stats = snapshot.statistics('lineno')
-
-    # print("[ Top 10 ]")
-    # for stat in top_stats[:10]:
-    #     print(stat)
