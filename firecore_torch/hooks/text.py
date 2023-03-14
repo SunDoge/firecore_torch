@@ -68,7 +68,7 @@ class TextLoggerHook(BaseHook):
         prefix = f'{stage} {batch_idx}/{epoch_length} {rate:.1f} spl/s'
 
         if eta_meter.is_updated:
-            prefix += ' etr: {}'.format(eta_meter.remaining_timedelta)
+            prefix += ' remaining: {}'.format(eta_meter.remaining_timedelta)
 
         logger.info('{} {}'.format(prefix, ' '.join(formatted_outputs)))
 
