@@ -15,7 +15,12 @@ def make_empty_future():
 
 class BaseMetric:
 
-    def __init__(self, fmt: str = '.4f', in_rules: Dict[str, str] = {}, out_rules: Dict[str, str] = {}) -> None:
+    def __init__(
+        self,
+        fmt: str = '.4f',
+        in_rules: Dict[str, str] = {},
+        out_rules: Dict[str, str] = {}
+    ) -> None:
         self._fmt = fmt
         self._in_rules = in_rules
         self._out_rules = out_rules
@@ -62,6 +67,8 @@ class BaseMetric:
         self._cached_result = None
         self._is_synced = False
         self._reset()
+
+    
 
     def _update(self, output: Tensor, target: Tensor):
         """

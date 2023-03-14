@@ -119,6 +119,7 @@ def main():
         device=device,
         max_epochs=max_epochs,
         summary_writer=summary_writer,
+        work_dir=args.work_dir,
     )
 
     workflows: Dict[str, Trainer] = {}

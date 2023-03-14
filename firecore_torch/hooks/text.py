@@ -10,11 +10,6 @@ from firecore.meter import Meter
 logger = logging.getLogger(__name__)
 
 
-class FmtCfg(TypedDict):
-    key: str
-    fmt: str
-
-
 class TextLoggerHook(BaseHook):
 
     # TODO: change metric_keys to other name

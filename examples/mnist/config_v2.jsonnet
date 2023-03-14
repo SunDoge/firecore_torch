@@ -120,6 +120,9 @@
       {
         _call: 'firecore_torch.hooks.TbForMetricsHook',
       },
+      {
+        _call: 'firecore_torch.hooks.CheckpointHook',
+      }
     ],
   },
   plans: [
