@@ -1,7 +1,6 @@
 from firecore_torch.metrics import Accuracy, Average
 import firecore
 import typed_args as ta
-from dataclasses import dataclass
 from pathlib import Path
 from firecore_torch.modules.base import BaseModel
 from typing import Dict, List
@@ -15,17 +14,9 @@ from firecore_torch.runners import Trainer
 from firecore_torch import helpers
 import logging
 from torch.utils.tensorboard import SummaryWriter
-
+from firecore_torch.helpers.arguments import Args
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class Args(ta.TypedArgs):
-    config: Path = ta.add_argument('-c', '--config', type=Path, required=True)
-    device: str = ta.add_argument('-d', '--device', default='cpu')
-    work_dir: Path = ta.add_argument(
-        '-w', '--work-dir', type=Path, required=True)
 
 
 class Net(BaseModel):
@@ -69,7 +60,7 @@ def main():
 
     # firecore.logging.init(level='INFO')
 
-    args = Args.from_args()
+    args = Args.parse_args()
 
     args.work_dir.mkdir(parents=True)
 
@@ -78,7 +69,7 @@ def main():
         level=logging.INFO,
     )
 
-    device = torch.device(args.device)
+    device = args.device
     backend = get_backend(device.type)
 
     init_process_group(backend)
