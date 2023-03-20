@@ -4,7 +4,7 @@ import torch
 
 
 @ta.argument_parser()
-class Args:
+class Args(ta.TypedArgs):
     config: Path = ta.add_argument(
         '-c', '--config',
         type=Path,
