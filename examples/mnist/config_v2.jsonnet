@@ -1,7 +1,7 @@
 {
   base: {
     batch_size: 64,
-    num_workers: 0,
+    num_workers: 1,
     max_epochs: 14,
   },
   model: {
@@ -63,12 +63,10 @@
       },
       {
         _call: 'firecore_torch.hooks.TextLoggerHook',
-        fmt: [
-          { key: 'loss', fmt: ':.4f' },
-          { key: 'acc1', fmt: ':.4f' },
-          { key: 'acc5', fmt: ':.4f' },
-        ],
         metric_keys: ['loss'],
+      },
+      {
+        _call: 'firecore_torch.hooks.TbForMetricsHook',
       },
     ],
   },
@@ -102,7 +100,7 @@
       metrics: {
         loss: {
           _call: 'firecore_torch.metrics.Average',
-          in_rules: { output: 'loss', target: 'target' },
+          in_rules: { output: 'loss', n: 'batch_size' },
           out_rules: { loss: 'avg' },
         },
         acc: {
@@ -117,13 +115,14 @@
       },
       {
         _call: 'firecore_torch.hooks.TextLoggerHook',
-        fmt: [
-          { key: 'loss', fmt: ':.4f' },
-          { key: 'acc1', fmt: ':.4f' },
-          { key: 'acc5', fmt: ':.4f' },
-        ],
         metric_keys: ['loss', 'acc'],
       },
+      {
+        _call: 'firecore_torch.hooks.TbForMetricsHook',
+      },
+      {
+        _call: 'firecore_torch.hooks.CheckpointHook',
+      }
     ],
   },
   plans: [
