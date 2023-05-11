@@ -68,7 +68,12 @@ class BaseMetric:
         self._is_synced = False
         self._reset()
 
-    
+    def display(self) -> Dict[str, str]:
+        tmpl = "{:" + self._fmt + "}"
+        outputs = {}
+        for key, value in self.compute().items():
+            outputs[key] = tmpl.format(value.item())
+        return outputs
 
     def _update(self, output: Tensor, target: Tensor):
         """
