@@ -1,7 +1,7 @@
 import torch
 from typing import Optional, List, Dict, Union
 from torch import Tensor
-from firecore.adapter import adapt_v2
+from firecore import adapter
 
 
 class BatchSizeExtractor:
@@ -51,18 +51,14 @@ class BatchProcessor:
 
     def __call__(self, batch: Union[List[Tensor], Dict[str, Tensor]]):
         if self._names is not None:
-            batch = self.name_batch(batch)
+            batch = adapter.nameing(batch, self._names)
 
-        batch = adapt_v2(batch, self._rules)
+        if self._rules is not None:
+            batch = adapter.extract(batch, self._rules)
 
         batch_size = self._batch_size_extractor(batch)
 
         return batch, batch_size
-
-    def name_batch(self, batch: List[Tensor]):
-        assert isinstance(batch, list)
-        assert len(self._names) == len(batch)
-        return {k: v for k, v in zip(self._names, batch)}
 
     def get_batch_size(self, batch: Dict[str, Tensor]):
         if self._batch_size_key:

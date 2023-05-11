@@ -1,7 +1,7 @@
 from torch import Tensor
 import torch
-from typing import Dict, Optional, Union
-from firecore.adapter import adapt
+from typing import Dict, Optional, Union, List
+from firecore.adapter import extract
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,9 +17,9 @@ class BaseMetric:
 
     def __init__(
         self,
+        in_rules: List[str],
+        out_rules: List[str],
         fmt: str = '.4f',
-        in_rules: Dict[str, str] = {},
-        out_rules: Dict[str, str] = {}
     ) -> None:
         self._fmt = fmt
         self._in_rules = in_rules
@@ -27,33 +27,19 @@ class BaseMetric:
         self._cached_result: Optional[Dict[str, Tensor]] = None
         self._is_synced: bool = False
 
-    def update(self, *args, **kwargs):
+    def update(self, **kwargs):
         self._cached_result = None
         self._is_synced = False
-        self._update(*args, **kwargs)
 
-    def update_adapted(self, **kwargs):
-        new_kwargs = adapt(kwargs, self._in_rules)
-        self.update(**new_kwargs)
+        new_args = extract(kwargs, self._in_rules)
+        self._update(*new_args)
 
     def compute(self) -> Dict[str, Tensor]:
         if self._cached_result is None:
-            self._cached_result = self._compute()
+            outputs = self._compute()
+            assert len(outputs) == len(self._out_rules)
+            
         return self._cached_result
-
-    def compute_adapted(self, fmt: bool = False) -> Union[Dict[str, Tensor], Dict[str, str]]:
-        """
-        FIXME: not a very good idea to use fmt
-        """
-        out = self.compute()
-        assert isinstance(out, dict)
-        new_out = adapt(out, self._out_rules)
-
-        if fmt:
-            tmpl = "{:" + self._fmt + "}"
-            new_out = {k: tmpl.format(v) for k, v in new_out.items()}
-
-        return new_out
 
     def sync(self) -> Optional[torch.futures.Future]:
         if self._is_synced:
