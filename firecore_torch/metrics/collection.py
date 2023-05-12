@@ -9,7 +9,7 @@ import torch
 logger = logging.getLogger(__name__)
 
 
-class MetricCollection:
+class MetricCollectionV2:
 
     def __init__(
         self,

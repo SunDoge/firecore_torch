@@ -7,13 +7,13 @@ import torch.distributed as dist
 
 class Average(BaseMetric):
 
-    def __init__(self, fmt='.4f',  in_rules: Dict[str, str] = {}, out_rules: Dict[str, str] = {}) -> None:
-        super().__init__(fmt, in_rules, out_rules)
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
         self._sum = torch.tensor(0., dtype=torch.float)
         self._count = torch.tensor(0, dtype=torch.long)
         self._val = torch.tensor(0., dtype=torch.float)
 
-    def _update(self, output: Tensor, n: int, **kwargs):
+    def _update(self, output: Tensor, n: int):
         # print(output)
         device = output.device
 
@@ -23,12 +23,12 @@ class Average(BaseMetric):
             self._sum = self._sum.to(device)
 
         self._val.copy_(output)
-        self._sum.add_(output)
+        self._sum.add_(output, alpha=n)
         self._count.add_(n)
 
     def _compute(self):
         avg = self._sum / self._count
-        return {'avg': avg, 'val': self._val}
+        return avg
 
     def _sync(self) -> torch.futures.Future:
         return torch.futures.collect_all([

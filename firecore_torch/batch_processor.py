@@ -55,10 +55,12 @@ class BatchProcessor:
 
         if self._rules is not None:
             batch = adapter.extract(batch, self._rules)
-
+        
         batch_size = self._batch_size_extractor(batch)
 
-        return batch, batch_size
+        batch_on_device = {k:v.to(self._device, non_blocking=True) for k,v in batch.items()}
+
+        return batch_on_device, batch_size
 
     def get_batch_size(self, batch: Dict[str, Tensor]):
         if self._batch_size_key:

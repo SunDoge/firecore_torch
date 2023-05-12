@@ -3,11 +3,22 @@ from typing import List, Optional, Dict, Union
 from firecore_torch.hooks.base import BaseHook
 from firecore_torch.batch_processor import BatchProcessor
 from icecream import ic
-from firecore_torch.metrics.collection import MetricCollection
-from torch import Tensor
+from firecore_torch.metrics.collection import MetricCollectionV2
+from torch import Tensor, nn
+from firecore.meter import Meter
 
 
 class EpochBasedRunner(BaseRunner):
+    @staticmethod
+    def default_forward_fn(
+        model: nn.Module,
+        criterion: nn.Module,
+        **kwargs
+    ):
+        outputs = model(**kwargs)
+        losses = criterion(**outputs, **kwargs)
+        return outputs, losses
+
     def __init__(self, hooks: List[BaseHook], **kwargs) -> None:
         super().__init__(hooks, **kwargs)
         ic([(k, type(v)) for k, v in kwargs.items()])
@@ -25,6 +36,7 @@ class EpochBasedRunner(BaseRunner):
         epoch_length: Optional[int],
         # From self
         data_source,
+        metrics: MetricCollectionV2,
         **kwargs
     ):
         self.call_hook(
@@ -32,6 +44,8 @@ class EpochBasedRunner(BaseRunner):
             epoch=epoch,
             epoch_length=epoch_length,
         )
+
+        metrics.reset()
 
         if epoch_length is not None:
             data_source_iter = iter(data_source)
@@ -69,7 +83,7 @@ class EpochBasedRunner(BaseRunner):
         # From self
         batch_processor: BatchProcessor,
         forward_fn,
-        metrics: MetricCollection,
+        metrics: MetricCollectionV2,
         **kwargs
     ):
         self.call_hook(

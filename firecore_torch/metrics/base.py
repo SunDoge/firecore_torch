@@ -1,7 +1,7 @@
 from torch import Tensor
 import torch
 from typing import Dict, Optional, Union, List
-from firecore.adapter import extract
+from firecore import adapter
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,10 +17,13 @@ class BaseMetric:
 
     def __init__(
         self,
-        in_rules: List[str],
-        out_rules: List[str],
+        in_rules: List[str] = None,
+        out_rules: List[str] = None,
         fmt: str = '.4f',
     ) -> None:
+        assert isinstance(in_rules, list)
+        assert isinstance(out_rules, list)
+
         self._fmt = fmt
         self._in_rules = in_rules
         self._out_rules = out_rules
@@ -31,14 +34,17 @@ class BaseMetric:
         self._cached_result = None
         self._is_synced = False
 
-        new_args = extract(kwargs, self._in_rules)
+        new_args = adapter.extract(kwargs, self._in_rules)
         self._update(*new_args)
 
     def compute(self) -> Dict[str, Tensor]:
         if self._cached_result is None:
             outputs = self._compute()
-            assert len(outputs) == len(self._out_rules)
-            
+            self._cached_result = adapter.nameing(
+                outputs,
+                self._out_rules
+            )
+
         return self._cached_result
 
     def sync(self) -> Optional[torch.futures.Future]:
