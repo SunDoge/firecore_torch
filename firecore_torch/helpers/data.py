@@ -1,6 +1,5 @@
 from torch.utils.data import Dataset, DataLoader
 from typing import Type, Callable, Dict, Any
-import torch.distributed as dist
 from torch.utils.data import DistributedSampler, Sampler
 from typing import Optional
 import logging
@@ -8,6 +7,10 @@ import torch.multiprocessing as mp
 import firecore
 from torch import Tensor
 import torch
+from . import distributed as dist_utils
+from torch.utils.data import IterDataPipe
+import torch.multiprocessing as mp
+from torch.utils.data.graph_settings import apply_sharding
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +32,7 @@ def make_loader(
     shuffle: bool = True,
     **kwargs,
 ):
-    if dist.is_available() and dist.is_initialized():
+    if dist_utils.is_distributed():
         if shuffle:
             sampler = DistributedSampler(dataset)
         else:
@@ -72,12 +75,10 @@ class DistributedExactSampler(Sampler):
     ) -> None:
         super().__init__(data_source)
         if num_replicas is None:
-            assert dist.is_available() and dist.is_initialized()
-            num_replicas = dist.get_world_size()
+            num_replicas = dist_utils.get_world_size_safe()
 
         if rank is None:
-            assert dist.is_available() and dist.is_initialized()
-            rank = dist.get_rank()
+            rank = dist_utils.get_rank_safe()
 
         if rank >= num_replicas or rank < 0:
             raise ValueError('invalid rank {}', rank)
@@ -99,3 +100,33 @@ class DistributedExactSampler(Sampler):
 
     def __len__(self):
         return self.num_samples
+
+
+def create_data_loader_from_pipeline(
+    dp: IterDataPipe,
+    batch_size: int = 1,
+    num_workers: int = 0,
+    pin_memory: bool = True,
+    drop_last: bool = False,
+    mp_ctx=mp.get_context('fork'),
+    collate_fn=None,
+    worker_init_fn=None,
+    **kwargs,
+):
+    if dist_utils.is_distributed():
+        world_size = dist_utils.get_world_size_safe()
+        rank = dist_utils.get_rank_safe()
+        logger.info(f'apply_shard with world_size={world_size}, rank={rank}')
+        apply_sharding(dp, world_size, rank)
+
+    return DataLoader(
+        dp,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        drop_last=drop_last,
+        multiprocessing_context=mp_ctx,
+        collate_fn=collate_fn,
+        worker_init_fn=worker_init_fn,
+        **kwargs
+    )

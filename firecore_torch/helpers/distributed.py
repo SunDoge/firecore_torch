@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import os
 from typing import TypeVar
 from firecore.system import find_free_port
+from torch.utils.data import graph_settings
 
 T = TypeVar('T')
 
@@ -26,3 +27,19 @@ def init_process_group(backend: str):
     dist.init_process_group(backend)
 
 
+def is_distributed() -> bool:
+    return dist.is_available() and dist.is_initialized()
+
+
+def get_rank_safe() -> int:
+    if is_distributed():
+        return dist.get_rank()
+    else:
+        return 0
+
+
+def get_world_size_safe() -> int:
+    if is_distributed():
+        return dist.get_world_size()
+    else:
+        return 1
