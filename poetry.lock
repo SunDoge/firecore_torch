@@ -295,14 +295,14 @@ files = [
 
 [[package]]
 name = "typed-args"
-version = "0.6.1"
+version = "0.6.4"
 description = "Parse command line arguments by defining dataclasses"
 category = "main"
 optional = false
 python-versions = ">=3.6,<4.0"
 files = [
-    {file = "typed_args-0.6.1-py3-none-any.whl", hash = "sha256:137243e4492bdc3bcb8a8d2e769dbbe0a0425ed79e5aebf5dd14b04484ec2083"},
-    {file = "typed_args-0.6.1.tar.gz", hash = "sha256:7da5c5bd434cabf2f25e534c08ee69a54e804c09116f30cf1e0f2c84f6f01ecf"},
+    {file = "typed_args-0.6.4-py3-none-any.whl", hash = "sha256:ac3058dcafd4803ec60e98dfefa16908586672b27293d19d4481fc37d481e17b"},
+    {file = "typed_args-0.6.4.tar.gz", hash = "sha256:86d5a9f986b1c0f8d147420c546af133bbfd3c60408e3b85c42a02ab85fa0797"},
 ]
 
 [[package]]
@@ -320,4 +320,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "526a3266fad9306d50d04d704027a809a93260891ae7d13618283b1a8e1aa26c"
+content-hash = "c480bdfab6d795702dacfb05f88334ef50ab9fd2a8cf18eee0fccdf01222af89"
