@@ -16,26 +16,26 @@ def test_avg():
 
         assert torch.allclose(result, x.mean())
 
-        meter._sync().wait()
+        meter.sync()
         result = meter._compute()
         assert torch.allclose(result, x.mean())
 
 
-# def test_accuracy():
-#     with init_cpu_process_group():
-#         acc = Accuracy(topk=[1, 5])
+def test_accuracy():
+    with init_cpu_process_group():
+        acc = Accuracy(topk=[1, 5])
 
-#         x = torch.rand(10, 10)
-#         x[:, 0] = 1.0
-#         x[1:, 1] = 2.0
-#         y = torch.zeros(10, dtype=torch.long)
+        x = torch.rand(10, 10)
+        x[:, 0] = 1.0
+        x[1:, 1] = 2.0
+        y = torch.zeros(10, dtype=torch.long)
 
-#         acc.update(x, y)
-#         res = acc.compute()
-#         assert res['acc1'] == 0.1
-#         assert res['acc5'] == 1.0
+        acc._update(x, y)
+        acc1, acc5 = acc._compute()
+        assert acc1 == 0.1
+        assert acc5 == 1.0
 
-#         acc.sync()
-#         res = acc.compute()
-#         assert res['acc1'] == 0.1
-#         assert res['acc5'] == 1.0
+        acc.sync()
+        acc1, acc5 = acc._compute()
+        assert acc1 == 0.1
+        assert acc5 == 1.0

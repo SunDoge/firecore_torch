@@ -4,6 +4,9 @@ import torch
 from torch import Tensor, nn
 from . import functional as F
 import torch.distributed as dist
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Accuracy(BaseMetric):
@@ -16,7 +19,9 @@ class Accuracy(BaseMetric):
         self._count = torch.tensor(0, dtype=torch.long)
         self._sum = torch.zeros(len(topk), dtype=torch.float)
 
-        self.register_buffer_names('_count', '_sum')
+        if not self._out_rules:
+            self._out_rules = [f'acc{k}' for k in topk]
+            logger.info(f'set default out_rules: {self._out_rules}')
 
     def _update(self, output: Tensor, target: Tensor):
         device = output.device

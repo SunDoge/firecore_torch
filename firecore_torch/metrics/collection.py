@@ -55,12 +55,8 @@ class MetricCollection(BaseMetric):
         futs = [fut]
 
         for metric in self._metrics:
-            fut = metric.sync()
-            if fut is not None:
-                futs.append(fut)
-            else:
-                logger.warning(f"{metric} has not fut, check it")
-
+            fut = metric._sync()
+            futs.append(fut)
         return torch.futures.collect_all(futs)
 
     def reset(self):

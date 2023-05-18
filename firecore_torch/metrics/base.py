@@ -55,13 +55,12 @@ class BaseMetric(nn.Module):
 
         return self._cached_result
 
-    def sync(self) -> Optional[torch.futures.Future]:
+    def sync(self):
         if self._is_synced:
             logger.info('Already synced, skip')
-            return
         else:
             self._is_synced = True
-            return self._sync()
+            self._sync().wait()
 
     def reset(self):
         self._cached_result = None

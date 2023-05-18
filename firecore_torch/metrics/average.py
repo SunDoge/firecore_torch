@@ -19,14 +19,6 @@ class Average(BaseMetric):
         self.register_buffer('_val', torch.tensor(0., dtype=torch.float))
 
     def _update(self, output: Tensor, n: int):
-        # print(output)
-        # device = output.device
-
-        # if self._val.device != device:
-        #     self._val = self._val.to(device)
-        #     self._count = self._count.to(device)
-        #     self._sum = self._sum.to(device)
-
         self._val.copy_(output)
         self._sum.add_(output, alpha=n)
         self._count.add_(n)
