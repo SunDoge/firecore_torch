@@ -4,7 +4,7 @@ from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler as LrScheduler
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data import DataLoader
-from firecore_torch.metrics import MetricCollection
+from firecore_torch.metrics import MetricCollectionV2
 import logging
 from firecore_torch import helpers
 import torch
@@ -21,7 +21,7 @@ class Evaluator(BaseRunner):
         criterion: nn.Module,
         data: DataLoader,
         device: torch.device,
-        metrics: MetricCollection,
+        metrics: MetricCollectionV2,
         log_interval: int,
         **kwargs
     ) -> None:

@@ -1,22 +1,22 @@
 from .base import BaseMetric
 from typing import Dict, List
 import torch
-from torch import Tensor
+from torch import Tensor, nn
 from . import functional as F
 import torch.distributed as dist
 
 
 class Accuracy(BaseMetric):
 
-    def __init__(self, topk: List[int] = [1], fmt='.4f', in_rules: Dict[str, str] = {}, out_rules: Dict[str, str] = {}) -> None:
-        super().__init__(fmt, in_rules, out_rules)
+    def __init__(self, topk: List[int] = [1], **kwargs) -> None:
+        super().__init__(**kwargs)
 
         self._topk = topk
 
         self._count = torch.tensor(0, dtype=torch.long)
         self._sum = torch.zeros(len(topk), dtype=torch.float)
 
-    def _update(self, output: Tensor, target: Tensor, **kwargs):
+    def _update(self, output: Tensor, target: Tensor):
         device = output.device
         batch_size = target.size(0)
 
@@ -30,13 +30,8 @@ class Accuracy(BaseMetric):
         self._count.add_(batch_size)
 
     def _compute(self):
-        result = {}
-
         acc = self._sum / self._count
-
-        for i, k in enumerate(self._topk):
-            result['acc{}'.format(k)] = acc[i]
-        return result
+        return acc.unbind(0)
 
     def _sync(self) -> torch.futures.Future:
         return torch.futures.collect_all([

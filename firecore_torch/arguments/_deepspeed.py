@@ -4,19 +4,19 @@ from dataclasses import dataclass
 
 
 @dataclass
-class DeepspeedArgGroup:
+class DeepspeedGroup:
     deepspeed: bool = ta.add_argument(
-        '--deepseed', action='store_true',
+        '--deepspeed', action='store_true',
     )
     "Enable DeepSpeed (helper flag for user code, no impact on DeepSpeed backend)"
 
     deepspeed_config: Optional[str] = ta.add_argument(
-        '--deepspeed_config', type=str,
+        '--deepspeed-config', type=str,
     )
     "DeepSpeed json configuration file."
 
     deepspeed_mpi: bool = ta.add_argument(
-        '--deepspeed_mpi', action='store_true',
+        '--deepspeed-mpi', action='store_true',
     )
     """
     Run via MPI, this will attempt to discover the necessary variables to initialize torch

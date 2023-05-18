@@ -1,1 +1,1 @@
-from ._deepspeed import DeepspeedArgGroup
+from ._deepspeed import DeepspeedGroup

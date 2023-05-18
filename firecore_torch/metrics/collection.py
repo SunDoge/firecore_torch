@@ -9,7 +9,7 @@ import torch
 logger = logging.getLogger(__name__)
 
 
-class MetricCollection:
+class MetricCollectionV2:
 
     def __init__(
         self,
@@ -50,3 +50,36 @@ class MetricCollection:
         for key in keys:
             res.update(self._metrics[key].compute_adapted(fmt=fmt))
         return res
+
+
+class MetricCollectionV2:
+
+    def __init__(
+        self,
+        metrics: List[BaseMetric]
+    ) -> None:
+        self._metrics = metrics
+
+    @torch.no_grad()
+    def update(self, **kwargs):
+        for metric in self._metrics:
+            metric.update(**kwargs)
+
+    @torch.no_grad()
+    def compute(self) -> Dict[str, Tensor]:
+        outputs = {}
+        for metric in self._metrics:
+            outputs.update(
+                metric.compute()
+            )
+        return outputs
+
+    def reset(self):
+        for metric in self._metrics:
+            metric.reset()
+
+    def display(self) -> Dict[str, str]:
+        outputs = {}
+        for metric in self._metrics:
+            outputs.update(metric.display())
+        return outputs
