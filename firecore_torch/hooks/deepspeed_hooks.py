@@ -1,6 +1,5 @@
 from .base import BaseHook
 from torch import nn, Tensor
-from deepspeed.runtime.engine import DeepSpeedEngine
 from firecore.meter import Meter
 
 
@@ -19,7 +18,7 @@ class DeepspeedTraining(BaseHook):
 
         model.train()
 
-    def after_forward(self, loss: Tensor, model: DeepSpeedEngine,  **kwargs):
+    def after_forward(self, loss: Tensor, model: 'DeepSpeedEngine',  **kwargs):
         model.backward(loss)
         model.step()
 
@@ -31,7 +30,6 @@ class DeepspeedInference(BaseHook):
 
     def __init__(self) -> None:
         super().__init__()
-
 
     def before_epoch(self, **kwargs):
         return super().before_epoch(**kwargs)

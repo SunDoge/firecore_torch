@@ -55,18 +55,15 @@ class TextLoggerHook(BaseHook):
     ):
         self._rate_meter.step(n=batch_size)
 
-        if batch_idx > 0 and batch_idx % self._interval != 0:
-            return
+        if (batch_idx + 1) % self._interval == 0:
+            rate = self._rate_meter.rate
+            prefix = f'{stage} {batch_idx + 1}/{epoch_length} {rate:.1f} spl/s'
 
-        # metric_outputs = metrics.compute_by_keys(self._metric_keys, fmt=True)
+            if eta_meter.is_updated:
+                prefix += ' remaining: {}'.format(
+                    eta_meter.remaining_timedelta)
 
-        rate = self._rate_meter.rate
-        prefix = f'{stage} {batch_idx + 1}/{epoch_length} {rate:.1f} spl/s'
-
-        if eta_meter.is_updated:
-            prefix += ' remaining: {}'.format(eta_meter.remaining_timedelta)
-
-        logger.info('{} loss: {:.4f}'.format(prefix, loss.item()))
+            logger.info('{} loss: {:.4f}'.format(prefix, loss.item()))
 
     def _format_metrics(self, outputs: Dict[str, str]) -> List[str]:
         res = []
