@@ -3,7 +3,7 @@ from typing import List, Optional, Dict, Union
 from firecore_torch.hooks.base import BaseHook
 from firecore_torch.batch_processor import BatchProcessor
 from icecream import ic
-from firecore_torch.metrics.collection import MetricCollectionV2
+from firecore_torch.metrics.collection import MetricCollection
 from torch import Tensor, nn
 from firecore.meter import Meter
 
@@ -36,7 +36,7 @@ class EpochBasedRunner(BaseRunner):
         epoch_length: Optional[int],
         # From self
         data_source,
-        metrics: MetricCollectionV2,
+        metrics: MetricCollection,
         **kwargs
     ):
         self.call_hook(
@@ -83,7 +83,7 @@ class EpochBasedRunner(BaseRunner):
         # From self
         batch_processor: BatchProcessor,
         forward_fn,
-        metrics: MetricCollectionV2,
+        metrics: MetricCollection,
         **kwargs
     ):
         self.call_hook(

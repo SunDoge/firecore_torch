@@ -1,4 +1,4 @@
 from .accuracy import Accuracy
 from .average import Average
-from .collection import MetricCollectionV2, MetricCollectionV2
+from .collection import MetricCollection, MetricCollection
 from .speed import Speed

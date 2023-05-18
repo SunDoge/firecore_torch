@@ -7,20 +7,25 @@ import torch.distributed as dist
 
 class Average(BaseMetric):
 
+    _sum: Tensor
+    _count: Tensor
+    _val: Tensor
+
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        self._sum = torch.tensor(0., dtype=torch.float)
-        self._count = torch.tensor(0, dtype=torch.long)
-        self._val = torch.tensor(0., dtype=torch.float)
+
+        self.register_buffer('_sum', torch.tensor(0., dtype=torch.float))
+        self.register_buffer('_count', torch.tensor(0, dtype=torch.long))
+        self.register_buffer('_val', torch.tensor(0., dtype=torch.float))
 
     def _update(self, output: Tensor, n: int):
         # print(output)
-        device = output.device
+        # device = output.device
 
-        if self._val.device != device:
-            self._val = self._val.to(device)
-            self._count = self._count.to(device)
-            self._sum = self._sum.to(device)
+        # if self._val.device != device:
+        #     self._val = self._val.to(device)
+        #     self._count = self._count.to(device)
+        #     self._sum = self._sum.to(device)
 
         self._val.copy_(output)
         self._sum.add_(output, alpha=n)

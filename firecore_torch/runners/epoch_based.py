@@ -3,7 +3,7 @@ from torch import nn, Tensor
 from typing import Dict, Iterable, List, Callable
 import torch
 from firecore_torch import helpers
-from firecore_torch.metrics import MetricCollectionV2
+from firecore_torch.metrics import MetricCollection
 import torch.distributed as dist
 from icecream import ic
 from .batch_processor import BatchProcessor
@@ -30,7 +30,7 @@ class EpochBasedRunner(BaseRunner):
         model: nn.Module,
         criterion: nn.Module,
         data_source: Iterable[Dict[str, Tensor]],
-        metrics: MetricCollectionV2,
+        metrics: MetricCollection,
         max_epochs: int,
         batch_cfg: dict,
 

@@ -3,6 +3,7 @@ import torch
 from typing import Dict, Optional, Union, List
 from firecore import adapter
 import logging
+from torch import nn
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ def make_empty_future():
     return fut
 
 
-class BaseMetric:
+class BaseMetric(nn.Module):
 
     def __init__(
         self,
@@ -21,6 +22,13 @@ class BaseMetric:
         out_rules: List[str] = None,
         fmt: str = '.4f',
     ) -> None:
+        super().__init__()
+
+        if in_rules is None:
+            in_rules = []
+        if out_rules is None:
+            out_rules = []
+
         assert isinstance(in_rules, list)
         assert isinstance(out_rules, list)
 
@@ -84,3 +92,5 @@ class BaseMetric:
 
     def _sync(self) -> Optional[torch.futures.Future]:
         pass
+
+    

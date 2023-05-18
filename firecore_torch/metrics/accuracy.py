@@ -16,6 +16,8 @@ class Accuracy(BaseMetric):
         self._count = torch.tensor(0, dtype=torch.long)
         self._sum = torch.zeros(len(topk), dtype=torch.float)
 
+        self.register_buffer_names('_count', '_sum')
+
     def _update(self, output: Tensor, target: Tensor):
         device = output.device
         batch_size = target.size(0)

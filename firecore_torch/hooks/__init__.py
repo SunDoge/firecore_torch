@@ -3,4 +3,4 @@ from .inference import InferenceHook
 from .text import TextLoggerHook
 from .tensorboard import TbForMetricsHook
 from .checkpoint import CheckpointHook
-from .deepspeed_training import DeepspeedTraining
+from .deepspeed_hooks import DeepspeedTraining

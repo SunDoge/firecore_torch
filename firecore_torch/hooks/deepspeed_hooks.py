@@ -25,3 +25,13 @@ class DeepspeedTraining(BaseHook):
 
     def after_iter(self, eta_meter: Meter, **kwargs):
         eta_meter.step()
+
+
+class DeepspeedInference(BaseHook):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+
+    def before_epoch(self, **kwargs):
+        return super().before_epoch(**kwargs)

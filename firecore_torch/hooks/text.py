@@ -1,5 +1,5 @@
 from .base import BaseHook
-from firecore_torch.metrics import MetricCollectionV2
+from firecore_torch.metrics import MetricCollection
 import logging
 from typing import List, Dict, TypedDict, Optional
 from torch import Tensor
@@ -34,7 +34,7 @@ class TextLoggerHook(BaseHook):
     def before_epoch(self, **kwargs):
         self._rate_meter.reset()
 
-    def after_epoch(self, epoch: int, metrics: MetricCollectionV2, max_epochs: int, stage: str, **kwargs):
+    def after_epoch(self, epoch: int, metrics: MetricCollection, max_epochs: int, stage: str, **kwargs):
 
         metric_outputs = metrics.display()
         formatted_outputs = self._format_metrics(metric_outputs)

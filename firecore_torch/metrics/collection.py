@@ -5,74 +5,63 @@ import logging
 from torch import Tensor
 from typing import Optional, Union
 import torch
+from .base import BaseMetric
+from torch import nn
+import torch.distributed as dist
 
 logger = logging.getLogger(__name__)
 
 
-class MetricCollectionV2:
+class MetricCollection(BaseMetric):
 
-    def __init__(
-        self,
-        metrics: Dict[str, BaseMetric],
-    ) -> None:
-        self._metrics = metrics
-
-    @torch.inference_mode()
-    def update(self, **kwargs):
-        for metric in self._metrics.values():
-            metric.update_adapted(**kwargs)
-
-    @torch.inference_mode()
-    def compute(self, fmt: bool = False) -> Union[Dict[str, Tensor], Dict[str, str]]:
-        out = {}
-        for metric in self._metrics.values():
-            out.update(metric.compute_adapted(fmt=fmt))
-        return out
-
-    def sync(self) -> torch.futures.Future:
-        logger.debug('Sync all metrics', metrics=self._metrics)
-        futs = []
-        for name, metric in self._metrics.items():
-            fut = metric.sync()
-            if fut is not None:
-                futs.append(fut)
-        return torch.futures.collect_all(futs)
-
-    # Fix RuntimeError: Inplace update to inference tensor outside InferenceMode is not allowed
-    @torch.inference_mode()
-    def reset(self):
-        logger.debug('Reset all metrics', metrics=self._metrics)
-        for name, metric in self._metrics.items():
-            metric.reset()
-
-    def compute_by_keys(self, keys: List[str], fmt: bool = False) -> Union[Dict[str, Tensor], Dict[str, str]]:
-        res = {}
-        for key in keys:
-            res.update(self._metrics[key].compute_adapted(fmt=fmt))
-        return res
-
-
-class MetricCollectionV2:
+    _num_samples: Tensor
 
     def __init__(
         self,
         metrics: List[BaseMetric]
     ) -> None:
-        self._metrics = metrics
+        super().__init__()
+
+        self._metrics: List[BaseMetric] = nn.ModuleList(metrics)
+
+        self.register_buffer('_num_samples', torch.tensor(0, dtype=torch.long))
 
     @torch.no_grad()
     def update(self, **kwargs):
+        batch_size = kwargs.get('batch_size')
+        assert batch_size, f'batch_size should not be none or 0, {batch_size}'
+
+        self._num_samples.add_(batch_size)
+
         for metric in self._metrics:
             metric.update(**kwargs)
 
     @torch.no_grad()
-    def compute(self) -> Dict[str, Tensor]:
+    def _compute(self) -> Dict[str, Tensor]:
         outputs = {}
         for metric in self._metrics:
             outputs.update(
                 metric.compute()
             )
+        outputs['num_samples'] = self._num_samples
         return outputs
+
+    @torch.no_grad()
+    def _sync(self) -> torch.futures.Future:
+        fut = dist.all_reduce(
+            self._num_samples, op=dist.ReduceOp.SUM,
+            async_op=True).get_future()
+
+        futs = [fut]
+
+        for metric in self._metrics:
+            fut = metric.sync()
+            if fut is not None:
+                futs.append(fut)
+            else:
+                logger.warning(f"{metric} has not fut, check it")
+
+        return torch.futures.collect_all(futs)
 
     def reset(self):
         for metric in self._metrics:
@@ -82,4 +71,5 @@ class MetricCollectionV2:
         outputs = {}
         for metric in self._metrics:
             outputs.update(metric.display())
+        outputs.update(super().display())
         return outputs
