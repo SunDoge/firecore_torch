@@ -71,6 +71,8 @@ class EpochBasedRunner(BaseRunner):
                     batch_idx=batch_idx,
                 )
 
+        metrics.sync()
+
         self.call_hook(
             "after_epoch",
             epoch=epoch,
