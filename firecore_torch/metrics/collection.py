@@ -14,59 +14,56 @@ logger = logging.getLogger(__name__)
 
 class MetricCollection(BaseMetric):
 
-    _num_samples: Tensor
-
     def __init__(
         self,
         metrics: List[BaseMetric]
     ) -> None:
         super().__init__()
-
         self._metrics: List[BaseMetric] = nn.ModuleList(metrics)
-
-        self.register_buffer('_num_samples', torch.tensor(0, dtype=torch.long))
 
     @torch.no_grad()
     def update(self, **kwargs):
-        batch_size = kwargs.get('batch_size')
-        assert batch_size, f'batch_size should not be none or 0, {batch_size}'
-
-        self._num_samples.add_(batch_size)
+        """
+        We have to skip adapter.extract
+        """
+        self._cached_result = None
+        self._is_synced = False
 
         for metric in self._metrics:
             metric.update(**kwargs)
 
     @torch.no_grad()
-    def _compute(self) -> Dict[str, Tensor]:
-        outputs = {}
-        for metric in self._metrics:
-            outputs.update(
-                metric.compute()
-            )
-        outputs['num_samples'] = self._num_samples
-        return outputs
+    def compute(self) -> Dict[str, Tensor]:
+        """
+        We have to 
+        """
+        if self._cached_result is None:
+            outputs = {}
+            for metric in self._metrics:
+                outputs.update(
+                    metric.compute()
+                )
+            self._cached_result = outputs
+
+        return self._cached_result
 
     @torch.no_grad()
     def _sync(self) -> torch.futures.Future:
-        fut = dist.all_reduce(
-            self._num_samples, op=dist.ReduceOp.SUM,
-            async_op=True).get_future()
-
-        futs = [fut]
-
+        futs = []
         for metric in self._metrics:
             fut = metric._sync()
             if fut is not None:
                 futs.append(fut)
         return torch.futures.collect_all(futs)
 
-    def reset(self):
+    @torch.no_grad()
+    def _reset(self):
         for metric in self._metrics:
             metric.reset()
 
+    @torch.no_grad()
     def display(self) -> Dict[str, str]:
         outputs = {}
         for metric in self._metrics:
             outputs.update(metric.display())
-        outputs.update(super().display())
         return outputs

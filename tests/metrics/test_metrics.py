@@ -53,3 +53,23 @@ def test_sample_counter():
         counter.sync()
 
         assert counter._compute() == 30
+
+
+def test_collection():
+    with init_cpu_process_group():
+        m = M.MetricCollection([
+            M.SampleCounter(),
+            M.Average(in_rules=['x', 'batch_size'], out_rules=['avg'])
+        ])
+        m.update(x=torch.tensor(2.0), batch_size=4)
+        outs = m.compute()
+        assert outs['num_samples'] == 4
+        assert outs['avg'] == 2.0
+
+        m.reset()
+
+        m.update(x=torch.tensor(2.0), batch_size=4)
+        outs = m.compute()
+        m.sync()
+        assert outs['num_samples'] == 4
+        assert outs['avg'] == 2.0
