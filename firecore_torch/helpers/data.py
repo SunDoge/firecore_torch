@@ -111,13 +111,18 @@ def create_data_loader_from_pipeline(
     mp_ctx=mp.get_context('fork'),
     collate_fn=None,
     worker_init_fn=None,
+    persistent_workers: bool = True,
     **kwargs,
 ):
-    if dist_utils.is_distributed():
-        world_size = dist_utils.get_world_size_safe()
-        rank = dist_utils.get_rank_safe()
-        logger.info(f'apply_shard with world_size={world_size}, rank={rank}')
-        apply_sharding(dp, world_size, rank)
+    """
+    worker_init_fn will configure sharding
+    """
+
+    if pin_memory and persistent_workers:
+        logger.warning(
+            "sometimes pin_memory + persistent_workers would be buggy"
+            "If you meet some bug, please turn off one of them"
+        )
 
     return DataLoader(
         dp,
@@ -128,5 +133,6 @@ def create_data_loader_from_pipeline(
         multiprocessing_context=mp_ctx,
         collate_fn=collate_fn,
         worker_init_fn=worker_init_fn,
+        persistent_workers=persistent_workers,
         **kwargs
     )

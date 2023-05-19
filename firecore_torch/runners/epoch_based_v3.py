@@ -6,6 +6,9 @@ from icecream import ic
 from firecore_torch.metrics.collection import MetricCollection
 from torch import Tensor, nn
 from firecore.meter import Meter
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class EpochBasedRunner(BaseRunner):
@@ -23,7 +26,7 @@ class EpochBasedRunner(BaseRunner):
         super().__init__(hooks, **kwargs)
         ic([(k, type(v)) for k, v in kwargs.items()])
 
-    def step(self, epoch: int, epoch_length: Optional[int]):
+    def step(self, epoch: int, epoch_length: Optional[int] = None):
         self.call_method(
             self.one_epoch,
             epoch=epoch,

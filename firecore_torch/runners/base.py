@@ -1,5 +1,5 @@
 from firecore_torch.hooks.base import BaseHook
-from typing import List
+from typing import List, Optional
 import logging
 
 logger = logging.getLogger(__name__)
@@ -7,9 +7,9 @@ logger = logging.getLogger(__name__)
 
 class BaseRunner:
 
-    def __init__(self, hooks: List[BaseHook], **kwargs) -> None:
+    def __init__(self, hooks: Optional[List[BaseHook]] = None, **kwargs) -> None:
         self._kwargs = kwargs
-        self._hooks = hooks
+        self._hooks = hooks if hooks else []
 
     def step(self, epoch: int):
         pass
@@ -27,15 +27,3 @@ class BaseRunner:
 
     def register_hook(self, hook: BaseHook):
         self._hooks.append(hook)
-
-
-class BaseRunner2:
-
-    def __init__(self, **kwargs) -> None:
-        self._kwargs = kwargs
-
-    def step(self, epoch: int):
-        pass
-
-    def call_method(self, func, **kwargs):
-        return func(**self.__dict__, **self._kwargs, **kwargs)
