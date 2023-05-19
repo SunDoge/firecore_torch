@@ -1,4 +1,4 @@
-from .base import BaseRunner, BaseRunner2
+from .base import BaseRunner
 from torch import nn, Tensor
 from typing import Dict, Iterable, List, Callable
 import torch
