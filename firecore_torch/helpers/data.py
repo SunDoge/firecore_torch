@@ -7,7 +7,7 @@ import torch.multiprocessing as mp
 import firecore
 from torch import Tensor
 import torch
-from . import distributed as dist_utils
+from . import dist_utils
 from torch.utils.data import IterDataPipe
 import torch.multiprocessing as mp
 from torch.utils.data.graph_settings import apply_sharding
