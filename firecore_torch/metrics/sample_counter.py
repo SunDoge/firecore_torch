@@ -9,7 +9,7 @@ class SampleCounter(BaseMetric):
 
     _num_samples: Tensor
 
-    def __init__(self, in_rules: List[str] | None = None, out_rules: List[str] | None = None, fmt: str = 'd') -> None:
+    def __init__(self, in_rules: Optional[List[str]] = None, out_rules: Optional[List[str]] = None, fmt: str = 'd') -> None:
         if in_rules == None:
             in_rules = ['batch_size']
         if out_rules == None:
@@ -32,7 +32,6 @@ class SampleCounter(BaseMetric):
             async_op=True
         ).get_future()
         return fut
-
 
     def _reset(self):
         self._num_samples.fill_(0)

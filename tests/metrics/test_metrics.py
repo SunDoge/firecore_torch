@@ -73,3 +73,5 @@ def test_collection():
         m.sync()
         assert outs['num_samples'] == 4
         assert outs['avg'] == 2.0
+
+        print(m.display())
