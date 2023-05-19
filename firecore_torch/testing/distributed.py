@@ -17,8 +17,8 @@ def init_cpu_process_group():
         world_size=1,
         rank=0,
     )
-
-    yield
-
-    logger.info('destroy process group')
-    dist.destroy_process_group()
+    try:
+        yield
+    finally:
+        logger.info('destroy process group')
+        dist.destroy_process_group()

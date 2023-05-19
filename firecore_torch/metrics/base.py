@@ -1,6 +1,6 @@
 from torch import Tensor
 import torch
-from typing import Dict, Optional, Union, List
+from typing import Dict, Optional, Union, List, Sequence
 from firecore import adapter
 import logging
 from torch import nn
@@ -18,8 +18,8 @@ class BaseMetric(nn.Module):
 
     def __init__(
         self,
-        in_rules: List[str] = None,
-        out_rules: List[str] = None,
+        in_rules: Optional[List[str]] = None,
+        out_rules: Optional[List[str]] = None,
         fmt: str = '.4f',
     ) -> None:
         super().__init__()
@@ -60,7 +60,9 @@ class BaseMetric(nn.Module):
             logger.info('Already synced, skip')
         else:
             self._is_synced = True
-            self._sync().wait()
+            fut = self._sync()
+            if fut is not None:
+                fut.wait()
 
     def reset(self):
         self._cached_result = None
@@ -74,13 +76,13 @@ class BaseMetric(nn.Module):
             outputs[key] = tmpl.format(value.item())
         return outputs
 
-    def _update(self, output: Tensor, target: Tensor):
+    def _update(self, *args):
         """
         overwrite
         """
         pass
 
-    def _compute(self) -> Dict[str, Tensor]:
+    def _compute(self) -> Union[Tensor, Sequence[Tensor]]:
         """
         overwrite
         """
@@ -91,5 +93,3 @@ class BaseMetric(nn.Module):
 
     def _sync(self) -> Optional[torch.futures.Future]:
         pass
-
-    

@@ -1,5 +1,7 @@
 from firecore_torch.metrics.average import Average
 from firecore_torch.metrics.accuracy import Accuracy
+import firecore_torch.metrics as M
+
 import torch
 from firecore_torch.testing.distributed import init_cpu_process_group
 
@@ -39,3 +41,15 @@ def test_accuracy():
         acc1, acc5 = acc._compute()
         assert acc1 == 0.1
         assert acc5 == 1.0
+
+
+def test_sample_counter():
+    with init_cpu_process_group():
+        counter = M.SampleCounter()
+        counter._update(10)
+        counter._update(20)
+        assert counter._compute() == 30
+
+        counter.sync()
+
+        assert counter._compute() == 30
