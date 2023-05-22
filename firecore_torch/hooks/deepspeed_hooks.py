@@ -33,3 +33,12 @@ class DeepspeedInference(BaseHook):
 
     def before_epoch(self, **kwargs):
         return super().before_epoch(**kwargs)
+
+
+class DeepspeedCheckpoint(BaseHook):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def after_epoch(self, model, **kwargs):
+        return super().after_epoch(**kwargs)
