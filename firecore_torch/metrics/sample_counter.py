@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 from .base import BaseMetric
 from torch import Tensor
 import torch
@@ -26,7 +26,7 @@ class SampleCounter(BaseMetric):
     def _compute(self):
         return self._num_samples
 
-    def _sync(self) -> torch.futures.Future | None:
+    def _sync(self) -> Optional[torch.futures.Future]:
         fut = dist.all_reduce(
             self._num_samples, op=dist.ReduceOp.SUM,
             async_op=True
